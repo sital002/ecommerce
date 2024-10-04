@@ -14,10 +14,11 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
+model Product {
+    id        String   @id @default(cuid())
     name      String
     createdAt DateTime @default(now())
+    price     Float
     updatedAt DateTime @updatedAt
 
     createdBy   User   @relation(fields: [createdById], references: [id])
@@ -62,7 +63,7 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
-    posts         Post[]
+    Product       Product[]
 }
 
 model VerificationToken {
