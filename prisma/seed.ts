@@ -28,6 +28,7 @@ function createUser(length: number) {
   for (let i = 0; i < length; i++) {
     users.push({
       id: faker.string.uuid(),
+      role: Math.random() > 0.5 ? "USER" : "VENDOR",
       email: faker.internet.email(),
       emailVerified: Math.random() > 0.5 ? new Date() : null,
       name: faker.person.fullName(),
@@ -45,6 +46,7 @@ async function createProduct(length: number) {
     products.push({
       name: faker.commerce.productName(),
       price: Number(faker.commerce.price()),
+      url: faker.image.avatar(),
       createdById: user,
       createdAt: new Date(),
       updatedAt: new Date(),

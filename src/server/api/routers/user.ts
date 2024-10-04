@@ -7,7 +7,7 @@ import {
 } from "~/server/api/trpc";
 import { db } from "~/server/db";
 
-export const productRouter = createTRPCRouter({
+export const userRouter = createTRPCRouter({
   get: publicProcedure.query(async () => {
     return db.product.findMany();
   }),
@@ -22,6 +22,7 @@ export const productRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const user = ctx.session.user;
+      console.log(user.role, "ROle");
       if (user.role === "USER")
         throw new TRPCError({
           code: "UNAUTHORIZED",

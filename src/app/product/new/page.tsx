@@ -1,17 +1,26 @@
+"use client";
 import React from "react";
-import { api } from "~/trpc/server";
+import { api } from "~/trpc/react";
+export default function Page() {
+  const mutation = api.product.create.useMutation();
 
-export default async function Page() {
-  const newProduct = await api.product.create({
-    name: "Samsung s22",
-    price: 4000,
-    url: "https://github.com/sital002.png",
-  });
   return (
     <div>
+      <button
+        onClick={() => {
+          mutation.mutate({
+            name: "test",
+            price: 1005,
+            url: "https://github.com/sital002.png",
+          });
+        }}
+      >
+        add product
+      </button>
+      <p>{mutation.error?.message}</p>
       Product:
-      <p>{newProduct.name}</p>
-      <p>{newProduct.price}</p>
+      <p>{"hello"}</p>
+      <p>{mutation.status}</p>
     </div>
   );
 }
