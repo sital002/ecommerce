@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
 
 export const productRouter = createTRPCRouter({
@@ -11,19 +7,21 @@ export const productRouter = createTRPCRouter({
     return db.product.findMany();
   }),
 
-  create: protectedProcedure
+  create: publicProcedure
     .input(
       z.object({
         name: z.string(),
         price: z.number(),
+        url: z.string().url(),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input }) => {
       return db.product.create({
         data: {
           name: input.name,
           price: input.price,
-          createdById: ctx.session.user.id,
+          url: input.url,
+          createdById: "cm1uihcgi0000c31osqaq2en3",
         },
       });
     }),

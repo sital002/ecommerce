@@ -14,22 +14,44 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Product {
-    id        String   @id @default(cuid())
-    name      String
-    createdAt DateTime @default(now())
-    price     Float
-    updatedAt DateTime @updatedAt
+enum ACCOUNT_STATUS {
+    SUSPENDED
+    ACTIVE
+}
 
-    createdBy   User   @relation(fields: [createdById], references: [id])
+enum ROLE {
+    ADMIN
+    VENDOR
+    USER
+}
+
+model Product {
+    id          String   @id @default(cuid())
+    name        String
+    createdAt   DateTime @default(now())
+    price       Float
+    url         String
+    updatedAt   DateTime @updatedAt
+    reviews     Review[]
+    createdBy   User     @relation(fields: [createdById], references: [id])
     createdById String
 
     @@index([name])
 }
 
+model Review {
+    id        String   @id @default(cuid())
+    author    User     @relation(fields: [authorId], references: [id])
+    authorId  String
+    content   String
+    rating    Int
+    product   Product? @relation(fields: [productId], references: [id])
+    productId String?
+}
+
 // Necessary for Next auth
 model Account {
-    id                       String  @id @default(cuid())
+    id                       String         @id @default(cuid())
     userId                   String
     type                     String
     provider                 String
@@ -41,7 +63,8 @@ model Account {
     scope                    String?
     id_token                 String? // @db.Text
     session_state            String?
-    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user                     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+    status                   ACCOUNT_STATUS @default(ACTIVE)
     refresh_token_expires_in Int?
 
     @@unique([provider, providerAccountId])
@@ -61,9 +84,11 @@ model User {
     email         String?   @unique
     emailVerified DateTime?
     image         String?
+    role          ROLE      @default(USER)
     accounts      Account[]
     sessions      Session[]
-    Product       Product[]
+    products      Product[]
+    reviews       Review[]
 }
 
 model VerificationToken {

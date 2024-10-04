@@ -205,7 +205,7 @@ function ProductCard({ product }: { product: Product }) {
               <Star
                 key={star}
                 className={`h-4 w-4 ${
-                  star <= Math.round(Math.random() * 5)
+                  star
                     ? "fill-current text-yellow-400"
                     : "text-muted-foreground"
                 }`}
