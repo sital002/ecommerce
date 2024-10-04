@@ -1,14 +1,10 @@
 import Link from "next/link";
 
-import { LatestPost } from "~/app/_components/post";
-import { env } from "~/env";
 import { getServerAuthSession } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
 
 export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
   const session = await getServerAuthSession();
-  console.log(session, env.GITHUB_CLIENT_ID);
 
   void api.post.getLatest.prefetch();
 
