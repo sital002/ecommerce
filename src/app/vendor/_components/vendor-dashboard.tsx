@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import type { Session } from "next-auth";
 
-import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Select,
@@ -21,15 +19,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import {
-  Package2,
-  ShoppingCart,
-  BarChart3,
-  Users,
-  Star,
-  MessageCircle,
-  Home,
-} from "lucide-react";
+import { Package2, ShoppingCart, BarChart3 } from "lucide-react";
 
 const chartData = Array.from({ length: 24 }, (_, i) => ({
   name: `${23 - i}:00`,
@@ -39,18 +29,6 @@ const chartData = Array.from({ length: 24 }, (_, i) => ({
   reviews: Math.floor(Math.random() * 10),
 })).reverse();
 
-const sidebarItems = [
-  { icon: BarChart3, label: "Dashboard" },
-  { icon: Package2, label: "Product" },
-  { icon: ShoppingCart, label: "Inventory" },
-  { icon: ShoppingCart, label: "Order" },
-  { icon: Star, label: "Review" },
-  { icon: Users, label: "Delivery Person" },
-  { icon: Users, label: "Customer" },
-  { icon: MessageCircle, label: "Message" },
-  { icon: Home, label: "Go to Home" },
-];
-
 interface VendorDashboardProps {
   user: Session["user"];
 }
@@ -58,21 +36,6 @@ export default function VendorDashboard({ user }: VendorDashboardProps) {
   return (
     <div className="flex h-screen flex-col bg-gray-100">
       <div className="flex flex-1 overflow-hidden">
-        <aside className="hidden w-64 bg-white p-4 md:block">
-          <nav>
-            {sidebarItems.map((item, index) => (
-              <Link
-                key={index}
-                href="#"
-                className="mt-4 flex items-center text-gray-600 hover:text-orange-500"
-              >
-                <item.icon className="mr-2 h-5 w-5" />
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </aside>
-
         <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-100">
           <div className="container mx-auto px-4 py-8">
             <div className="mb-8 flex items-center justify-between">
@@ -88,11 +51,9 @@ export default function VendorDashboard({ user }: VendorDashboardProps) {
                     <SelectItem value="last24">Last 24 Hrs.</SelectItem>
                     <SelectItem value="last7">Last 7 Days</SelectItem>
                     <SelectItem value="last30">Last 30 Days</SelectItem>
+                    <SelectItem value="lifetime">View Life time</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button className="ml-4 bg-black text-white hover:bg-gray-800">
-                  View LifeTime
-                </Button>
               </div>
             </div>
 
