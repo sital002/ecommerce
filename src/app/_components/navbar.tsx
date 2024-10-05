@@ -12,7 +12,7 @@ export default async function Navbar() {
   return (
     <header className="bg-white shadow-sm">
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
-        <Link href="/" className="text-2xl font-bold text-primary">
+        <Link href="/" className="text-xl font-bold text-primary">
           ShopSmart
         </Link>
         <div className="hidden items-center space-x-4 md:flex">

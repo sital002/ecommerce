@@ -1,5 +1,5 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { ROLE } from "@prisma/client";
+import type { ROLE } from "@prisma/client";
 import {
   getServerSession,
   type DefaultSession,
