@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { Session } from "next-auth";
+
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
@@ -10,8 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
-import { Input } from "~/components/ui/input";
 import {
   LineChart,
   Line,
@@ -29,8 +29,6 @@ import {
   Star,
   MessageCircle,
   Home,
-  Menu,
-  Search,
 } from "lucide-react";
 
 const chartData = Array.from({ length: 24 }, (_, i) => ({
@@ -53,11 +51,14 @@ const sidebarItems = [
   { icon: Home, label: "Go to Home" },
 ];
 
-export default function EnhancedVendorDashboard() {
+interface VendorDashboardProps {
+  user: Session["user"];
+}
+export default function VendorDashboard({ user }: VendorDashboardProps) {
   return (
     <div className="flex h-screen flex-col bg-gray-100">
       <div className="flex flex-1 overflow-hidden">
-        <aside className="hidden min-h-screen w-64 bg-white p-4 md:block">
+        <aside className="hidden w-64 bg-white p-4 md:block">
           <nav>
             {sidebarItems.map((item, index) => (
               <Link
@@ -76,7 +77,7 @@ export default function EnhancedVendorDashboard() {
           <div className="container mx-auto px-4 py-8">
             <div className="mb-8 flex items-center justify-between">
               <h1 className="text-2xl font-semibold text-gray-900">
-                Welcome Back, Saroj
+                Welcome Back, {user.name}
               </h1>
               <div className="flex items-center">
                 <Select defaultValue="last24">

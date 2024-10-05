@@ -31,8 +31,8 @@ export default async function Navbar() {
                 <ShoppingCart className="h-5 w-5" />
                 <span className="sr-only">Cart</span>
               </Button>
-              <Button variant="ghost" size="sm">
-                My Account
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/vendor">My Account</Link>
               </Button>
               <SignOutButton />
             </>

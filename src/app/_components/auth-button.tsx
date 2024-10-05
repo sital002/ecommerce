@@ -7,5 +7,9 @@ export function SignInButton() {
 }
 
 export function SignOutButton() {
-  return <Button onClick={() => signOut()}>Sign out</Button>;
+  return (
+    <Button onClick={() => signOut()} variant={"ghost"}>
+      Sign out
+    </Button>
+  );
 }
