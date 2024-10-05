@@ -10,14 +10,14 @@ import {
   MessageCircle,
 } from "lucide-react";
 const sidebarItems = [
-  { icon: BarChart3, label: "Dashboard", url: "/vendor" },
-  { icon: Package2, label: "Product", url: "/vendor/products" },
-  { icon: ShoppingCart, label: "Inventory", url: "/vendor/products" },
-  { icon: ShoppingCart, label: "Order", url: "/vendor/products" },
-  { icon: Star, label: "Review", url: "/vendor/products" },
-  { icon: Users, label: "Delivery Person", url: "/vendor/products" },
-  { icon: Users, label: "Customer", url: "/vendor/products" },
-  { icon: MessageCircle, label: "Message", url: "/vendor/products" },
+  { icon: BarChart3, label: "Dashboard", url: "/dashboard" },
+  { icon: Package2, label: "Product", url: "/dashboard/products" },
+  { icon: ShoppingCart, label: "Inventory", url: "/dashboard/products" },
+  { icon: ShoppingCart, label: "Order", url: "/dashboard/products" },
+  { icon: Star, label: "Review", url: "/dashboard/products" },
+  { icon: Users, label: "Delivery Person", url: "/dashboard/products" },
+  { icon: Users, label: "Customer", url: "/dashboard/products" },
+  { icon: MessageCircle, label: "Message", url: "/dashboard/products" },
 ];
 export default function Sidebar() {
   return (

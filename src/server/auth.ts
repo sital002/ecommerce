@@ -6,6 +6,7 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
+import Email from "next-auth/providers/email";
 import Github from "next-auth/providers/github";
 
 import { env } from "~/env";
@@ -59,6 +60,7 @@ export const authOptions: NextAuthOptions = {
       clientId: env.GITHUB_CLIENT_ID,
       clientSecret: env.GITHUB_CLIENT_SECRET,
     }),
+
     /**
      * ...add more providers here.
      *

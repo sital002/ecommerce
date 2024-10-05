@@ -32,7 +32,7 @@ export default async function Navbar() {
                 <span className="sr-only">Cart</span>
               </Button>
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/vendor">My Account</Link>
+                <Link href="/dashboard">My Account</Link>
               </Button>
               <SignOutButton />
             </>

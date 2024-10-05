@@ -1,7 +1,5 @@
 "use client";
-
 import type { Session } from "next-auth";
-
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Select,
@@ -85,7 +83,7 @@ export default function VendorDashboard({ user }: VendorDashboardProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">
-              Total Sale
+              Total Sales
             </CardTitle>
             <BarChart3 className="h-4 w-4 text-gray-600" />
           </CardHeader>
@@ -129,7 +127,7 @@ export default function VendorDashboard({ user }: VendorDashboardProps) {
       </div>
 
       {/* Charts */}
-      <div className="grid h-[300px] grid-cols-1 gap-6 overflow-y-auto md:grid-cols-2">
+      <div className="grid h-[330px] grid-cols-1 gap-6 overflow-y-auto md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Total Visitors</CardTitle>
