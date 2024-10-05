@@ -1,15 +1,12 @@
 import Link from "next/link";
-import { ShoppingCart, Search, Star, Menu } from "lucide-react";
-import { signOut, signIn } from "next-auth/react";
+import { Star } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Card, CardContent, CardFooter } from "~/components/ui/card";
-import { getServerAuthSession } from "~/server/auth";
-import { SignInButton, SignOutButton } from "./_components/auth-button";
 import { api } from "~/trpc/server";
-import { inferRouterOutputs } from "@trpc/server";
-import { AppRouter } from "~/server/api/root";
+import { type inferRouterOutputs } from "@trpc/server";
+import { type AppRouter } from "~/server/api/root";
 
 const categories = [
   { name: "Electronics", icon: "💻" },
@@ -21,48 +18,10 @@ const categories = [
 ];
 
 export default async function Homepage() {
-  const session = await getServerAuthSession();
   const products = await api.product.get();
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <Link href="/" className="text-2xl font-bold text-primary">
-            ShopSmart
-          </Link>
-          <div className="hidden items-center space-x-4 md:flex">
-            <Input
-              type="text"
-              placeholder="Search products..."
-              className="w-64"
-            />
-            <Button variant="ghost" size="icon">
-              <Search className="h-5 w-5" />
-              <span className="sr-only">Search</span>
-            </Button>
-            {session ? (
-              <>
-                <Button variant="ghost" size="icon">
-                  <ShoppingCart className="h-5 w-5" />
-                  <span className="sr-only">Cart</span>
-                </Button>
-                <Button variant="ghost" size="sm">
-                  My Account
-                </Button>
-                <SignOutButton />
-              </>
-            ) : (
-              <SignInButton />
-            )}
-          </div>
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Menu</span>
-          </Button>
-        </div>
-      </header>
-
       <main className="flex-grow">
         <section className="bg-gradient-to-r from-primary to-primary-foreground py-20 text-white">
           <div className="container mx-auto px-4 text-center">
