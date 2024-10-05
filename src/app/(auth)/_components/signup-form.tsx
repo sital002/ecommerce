@@ -17,8 +17,21 @@ import { Input } from "~/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card } from "~/components/ui/card";
 import Link from "next/link";
+import { api } from "~/trpc/react";
+
 const formSchema = z
   .object({
+    name: z
+      .string()
+      .min(1, {
+        message: "Name is required",
+      })
+      .max(64, {
+        message: "Name must be at most 64 characters",
+      })
+      .regex(/^[a-zA-Z\s]*$/, {
+        message: "Name can only contain letters and spaces",
+      }),
     email: z
       .string()
       .min(1, {
@@ -45,23 +58,37 @@ export default function VendorSignupform() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
+      name: "",
       password: "",
       confirm_password: "",
     },
   });
-
+  const signUpMutation = api.user.create.useMutation();
   function onSubmit(data: z.infer<typeof formSchema>) {
     console.log(data);
+    signUpMutation.mutate({
+      email: data.email,
+      password: data.password,
+      confirmPassword: data.confirm_password,
+      name: data.name,
+      role: "VENDOR",
+    });
   }
 
   type FormOptions = {
     label: string;
     name: keyof z.infer<typeof formSchema>;
     placeholder: string;
-    description: string;
+    description?: string;
     type: string;
   };
   const formOptions: FormOptions[] = [
+    {
+      label: "Name",
+      name: "name",
+      placeholder: "Enter your Name",
+      type: "text",
+    },
     {
       label: "Email",
       name: "email",
@@ -87,6 +114,7 @@ export default function VendorSignupform() {
   return (
     <Card className="mx-auto mt-4 max-w-xl p-2">
       <h2 className="text-center text-xl">Become a Seller</h2>
+      <p className="text-destructive">{signUpMutation.error?.message}</p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
           {formOptions.map((option) => (

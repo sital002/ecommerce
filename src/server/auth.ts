@@ -6,11 +6,12 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
-import Email from "next-auth/providers/email";
 import Github from "next-auth/providers/github";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
+import { compare } from "bcrypt";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -39,23 +40,57 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
+  session: {
+    strategy: "jwt",
+  },
   callbacks: {
-    session: async ({ session, user }) => {
-      const userFromDb = await db.user.findUnique({
-        where: { id: user.id },
-      });
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: user.id,
-          role: userFromDb?.role ?? "USER",
-        },
-      };
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string;
+        session.user.email = token.email;
+        session.user.name = token.name;
+      }
+      return session;
     },
   },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
+    CredentialsProvider({
+      id: "email-password",
+      name: "Email and Password",
+      credentials: {
+        email: { label: "email", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials, _req) {
+        if (!credentials) throw new Error("No credentials provided");
+        if (!credentials.email || !credentials.password) {
+          throw new Error("Email and password are required");
+        }
+        const user = await db.user.findUnique({
+          where: { email: credentials.email },
+        });
+        if (!user) {
+          throw new Error("Invalid credentials");
+        }
+
+        const isValid = await compare(
+          String(credentials.password),
+          String(user.password),
+        );
+        if (!isValid) throw new Error("Invalid credentials");
+        return user;
+      },
+    }),
+
     Github({
       clientId: env.GITHUB_CLIENT_ID,
       clientSecret: env.GITHUB_CLIENT_SECRET,

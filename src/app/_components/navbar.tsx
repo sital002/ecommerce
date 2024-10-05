@@ -3,7 +3,7 @@ import Link from "next/link";
 import React from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { SignInButton, SignOutButton } from "./auth-button";
+import { SignOutButton } from "./auth-button";
 import { getServerAuthSession } from "~/server/auth";
 
 export default async function Navbar() {
@@ -37,7 +37,9 @@ export default async function Navbar() {
               <SignOutButton />
             </>
           ) : (
-            <SignInButton />
+            <Link href="/signin">
+              <Button>Sign In</Button>
+            </Link>
           )}
         </div>
         <Button variant="ghost" size="icon" className="md:hidden">
