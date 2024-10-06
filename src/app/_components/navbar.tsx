@@ -37,9 +37,17 @@ export default async function Navbar() {
               <SignOutButton />
             </>
           ) : (
-            <Link href="/signin">
-              <Button>Sign In</Button>
-            </Link>
+            <>
+              <Link href="/signin">
+                <Button variant={"link"}>Beome a Seller</Button>
+              </Link>
+              <Link href="/signin">
+                <Button>Sign In</Button>
+              </Link>
+              <Link href={"/signup"}>
+                <Button variant={"outline"}>Sign Up</Button>
+              </Link>
+            </>
           )}
         </div>
         <Button variant="ghost" size="icon" className="md:hidden">

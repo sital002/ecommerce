@@ -53,7 +53,16 @@ const formSchema = z
     path: ["confirm_password"],
   });
 
-export default function VendorSignupform() {
+interface SignUpFormProps {
+  title: string;
+  description?: string;
+  role: "VENDOR" | "USER";
+}
+export default function SignUpForm({
+  title,
+  description,
+  role,
+}: SignUpFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -71,7 +80,7 @@ export default function VendorSignupform() {
       password: data.password,
       confirmPassword: data.confirm_password,
       name: data.name,
-      role: "VENDOR",
+      role: role,
     });
   }
 
@@ -113,7 +122,8 @@ export default function VendorSignupform() {
   ];
   return (
     <Card className="mx-auto mt-4 max-w-xl p-2">
-      <h2 className="text-center text-xl">Become a Seller</h2>
+      <h2 className="text-center text-xl">{title}</h2>
+      <p className="text-md text-gray-600">{description}</p>
       <p className="text-destructive">{signUpMutation.error?.message}</p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
@@ -138,7 +148,9 @@ export default function VendorSignupform() {
               )}
             />
           ))}
-          <Button type="submit">Submit</Button>
+          <Button type="submit" className="w-full">
+            Signup
+          </Button>
         </form>
       </Form>
       <p className="my-2 text-center">

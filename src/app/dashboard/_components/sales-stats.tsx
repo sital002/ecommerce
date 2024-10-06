@@ -1,6 +1,4 @@
-"use client";
-import type { Session } from "next-auth";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import React from "react";
 import {
   Select,
   SelectContent,
@@ -8,31 +6,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+
+import type { Session } from "next-auth";
 import { Package2, ShoppingCart, BarChart3 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
-const chartData = Array.from({ length: 24 }, (_, i) => ({
-  name: `${23 - i}:00`,
-  visitors: Math.floor(Math.random() * 100),
-  orders: Math.floor(Math.random() * 50),
-  revenue: Math.floor(Math.random() * 1000),
-  reviews: Math.floor(Math.random() * 10),
-})).reverse();
-
-interface VendorDashboardProps {
+interface SalesStatsProps {
   user: Session["user"];
 }
-export default function VendorDashboard({ user }: VendorDashboardProps) {
+export default function SalesStats({ user }: SalesStatsProps) {
   return (
-    <div className="container mx-auto bg-gray-100 px-4 py-8">
+    <>
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">
           Welcome Back, {user.name}
@@ -51,12 +35,10 @@ export default function VendorDashboard({ user }: VendorDashboardProps) {
           </Select>
         </div>
       </div>
-
       <p className="mb-8 text-gray-600">
         Here&apos;s what happening with your store today
       </p>
 
-      {/* Metrics */}
       <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         <Card className="bg-green-50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -125,74 +107,6 @@ export default function VendorDashboard({ user }: VendorDashboardProps) {
           </CardContent>
         </Card>
       </div>
-
-      {/* Charts */}
-      <div className="grid h-[330px] grid-cols-1 gap-6 overflow-y-auto md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Visitors</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="visitors" stroke="#8884d8" />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Order</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="orders" stroke="#82ca9d" />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Revenue</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="revenue" stroke="#ffc658" />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Review</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="reviews" stroke="#ff7300" />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    </>
   );
 }

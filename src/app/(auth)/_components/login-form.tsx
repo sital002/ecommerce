@@ -17,9 +17,10 @@ import { Input } from "~/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card } from "~/components/ui/card";
 import Link from "next/link";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+
 const formSchema = z.object({
   email: z
     .string()
@@ -37,9 +38,15 @@ const formSchema = z.object({
     }),
 });
 
-export default function VendorLoginForm() {
+interface LoginFormProps {
+  title: string;
+  description?: string;
+}
+
+export default function LoginForm({ title, description }: LoginFormProps) {
   const [error, setError] = useState("");
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,18 +56,20 @@ export default function VendorLoginForm() {
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
+    setLoading(true);
     const response = await signIn("email-password", {
       redirect: false,
       callbackUrl: "/dashboard",
       email: data.email,
       password: data.password,
     });
-
     if (response?.error) {
       setError(response.error);
+      setLoading(false);
     } else {
       router.replace("/dashboard");
       router.refresh();
+      setLoading(false);
     }
   }
 
@@ -89,7 +98,8 @@ export default function VendorLoginForm() {
   ];
   return (
     <Card className="mx-auto mt-4 max-w-xl p-2">
-      <h2 className="text-center text-xl">Signin as Seller</h2>
+      <h2 className="text-center text-xl">{title}</h2>
+      <h2 className="text-md text-gray-600">{description}</h2>
       <p className="text-destructive">{error}</p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
@@ -114,14 +124,15 @@ export default function VendorLoginForm() {
               )}
             />
           ))}
-          <Button type="submit" className="w-full">
-            Signin
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Loading" : "Signin"}
           </Button>
         </form>
       </Form>
 
       <p className="my-2 text-center text-gray-600">OR</p>
       <Button
+        disabled={loading}
         className="w-full"
         variant={"outline"}
         onClick={() => signIn("github")}
