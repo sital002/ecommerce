@@ -1,10 +1,18 @@
-import React from "react";
-import ManageProduct from "../_components/product";
+import React, { Suspense } from "react";
+import { api } from "~/trpc/server";
+import { DataTable } from "../_components/data-table";
+import ProductHeader from "./_components/product-header";
+import { columns } from "./columns";
 
-export default function page() {
+export default async function page() {
+  const products = await api.product.get();
+
   return (
     <div>
-      <ManageProduct />
+      <Suspense fallback={"Loading..."}>
+        <ProductHeader />
+        <DataTable columns={columns} data={products} />
+      </Suspense>
     </div>
   );
 }

@@ -15,9 +15,10 @@ export const productRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        name: z.string(),
-        price: z.number(),
-        url: z.string().url(),
+        name: z.string().min(3).max(255),
+        description: z.string().min(10).max(500),
+        price: z.number().min(0).max(1000000),
+        image: z.string().url(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -30,7 +31,7 @@ export const productRouter = createTRPCRouter({
         data: {
           name: input.name,
           price: input.price,
-          url: input.url,
+          url: input.image,
           createdById: user.id,
         },
       });

@@ -23,7 +23,7 @@ export default function Charts() {
   return (
     <div>
       {/* Charts */}
-      <div className="grid h-[330px] grid-cols-1 gap-6 overflow-y-auto md:grid-cols-2">
+      <div className="grid h-[300px] grid-cols-1 gap-6 overflow-y-auto md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Total Visitors</CardTitle>

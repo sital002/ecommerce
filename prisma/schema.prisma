@@ -25,6 +25,12 @@ enum ROLE {
     USER
 }
 
+enum STATUS {
+    PENDING
+    APPROVED
+    REJECTED
+}
+
 model Product {
     id          String   @id @default(cuid())
     name        String
@@ -35,6 +41,7 @@ model Product {
     reviews     Review[]
     createdBy   User     @relation(fields: [createdById], references: [id])
     createdById String
+    status      STATUS   @default(PENDING)
 
     @@index([name])
 }

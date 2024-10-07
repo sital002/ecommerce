@@ -21,7 +21,7 @@ const sidebarItems = [
 ];
 export default function Sidebar() {
   return (
-    <aside className="hidden h-fit w-64 overflow-y-auto bg-white p-4 md:block">
+    <aside className="sticky top-0 hidden h-screen w-64 overflow-y-auto bg-white p-4 md:block">
       <nav>
         {sidebarItems.map((item, index) => (
           <Link

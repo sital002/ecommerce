@@ -17,8 +17,8 @@ import { Input } from "~/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card } from "~/components/ui/card";
 import Link from "next/link";
+import type { RouterInputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
-
 const formSchema = z
   .object({
     name: z
@@ -56,8 +56,45 @@ const formSchema = z
 interface SignUpFormProps {
   title: string;
   description?: string;
-  role: "VENDOR" | "USER";
+  role: RouterInputs["user"]["create"]["role"];
 }
+
+type FormOptions = {
+  label: string;
+  name: keyof z.infer<typeof formSchema>;
+  placeholder: string;
+  description?: string;
+  type: string;
+};
+const formOptions: FormOptions[] = [
+  {
+    label: "Name",
+    name: "name",
+    placeholder: "Enter your Name",
+    type: "text",
+  },
+  {
+    label: "Email",
+    name: "email",
+    placeholder: "Enter your email",
+    description: "We'll never share your email with anyone else.",
+    type: "email",
+  },
+  {
+    label: "Password",
+    name: "password",
+    placeholder: "Enter your password",
+    description: "Make sure it's at least 8 characters.",
+    type: "password",
+  },
+  {
+    label: "Confirm Password",
+    name: "confirm_password",
+    placeholder: "Confirm your password",
+    description: "Make sure it matches the password above.",
+    type: "password",
+  },
+];
 export default function SignUpForm({
   title,
   description,
@@ -74,7 +111,6 @@ export default function SignUpForm({
   });
   const signUpMutation = api.user.create.useMutation();
   function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
     signUpMutation.mutate({
       email: data.email,
       password: data.password,
@@ -84,42 +120,6 @@ export default function SignUpForm({
     });
   }
 
-  type FormOptions = {
-    label: string;
-    name: keyof z.infer<typeof formSchema>;
-    placeholder: string;
-    description?: string;
-    type: string;
-  };
-  const formOptions: FormOptions[] = [
-    {
-      label: "Name",
-      name: "name",
-      placeholder: "Enter your Name",
-      type: "text",
-    },
-    {
-      label: "Email",
-      name: "email",
-      placeholder: "Enter your email",
-      description: "We'll never share your email with anyone else.",
-      type: "email",
-    },
-    {
-      label: "Password",
-      name: "password",
-      placeholder: "Enter your password",
-      description: "Make sure it's at least 8 characters.",
-      type: "password",
-    },
-    {
-      label: "Confirm Password",
-      name: "confirm_password",
-      placeholder: "Confirm your password",
-      description: "Make sure it matches the password above.",
-      type: "password",
-    },
-  ];
   return (
     <Card className="mx-auto mt-4 max-w-xl p-2">
       <h2 className="text-center text-xl">{title}</h2>

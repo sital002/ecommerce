@@ -10,7 +10,7 @@ export default async function Navbar() {
   const session = await getServerAuthSession();
 
   return (
-    <header className="bg-white shadow-sm">
+    <header className="sticky top-0 z-50 border-b border-b-gray-500 bg-white shadow-sm">
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <Link href="/" className="text-xl font-bold text-primary">
           ShopSmart

@@ -7,7 +7,7 @@ export default function Layout({
     <>
       <main className="flex">
         <Sidebar />
-        <div className="h-full w-full">{children}</div>
+        <div className="w-full bg-gray-100 p-2">{children}</div>
       </main>
     </>
   );
