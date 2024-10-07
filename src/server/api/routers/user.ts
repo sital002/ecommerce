@@ -1,11 +1,20 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { db } from "~/server/db";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import brcypt from "bcrypt";
 export const userRouter = createTRPCRouter({
-  get: publicProcedure.query(async () => {
-    return db.product.findMany();
+  get: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db.user.findUnique({
+      where: { id: ctx.session.user.id },
+      include: {
+        reviews: true,
+        products: true,
+      },
+    });
   }),
 
   create: publicProcedure
@@ -39,7 +48,7 @@ export const userRouter = createTRPCRouter({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to hash password",
         });
-      return db.user.create({
+      return ctx.db.user.create({
         data: {
           name: input.name,
           email: input.email,

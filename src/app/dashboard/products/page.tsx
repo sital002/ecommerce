@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import { api } from "~/trpc/server";
 import { DataTable } from "../_components/data-table";
 import ProductHeader from "./_components/product-header";
-import { columns } from "./columns";
+import { columns } from "./_components/columns";
 
 export default async function page() {
   const products = await api.product.get();

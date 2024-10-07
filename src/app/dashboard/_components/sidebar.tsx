@@ -8,6 +8,7 @@ import {
   Users,
   Star,
   MessageCircle,
+  User,
 } from "lucide-react";
 const sidebarItems = [
   { icon: BarChart3, label: "Dashboard", url: "/dashboard" },
@@ -18,6 +19,7 @@ const sidebarItems = [
   { icon: Users, label: "Delivery Person", url: "/dashboard/products" },
   { icon: Users, label: "Customer", url: "/dashboard/products" },
   { icon: MessageCircle, label: "Message", url: "/dashboard/products" },
+  { icon: User, label: "My Profile", url: "/dashboard/profile" },
 ];
 export default function Sidebar() {
   return (

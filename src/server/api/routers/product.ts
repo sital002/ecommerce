@@ -26,11 +26,13 @@ export const productRouter = createTRPCRouter({
       if (user.role === "USER")
         throw new TRPCError({
           code: "UNAUTHORIZED",
+          message: "You are not authorized to create products",
         });
       return db.product.create({
         data: {
           name: input.name,
           price: input.price,
+          description: input.description,
           url: input.image,
           createdById: user.id,
         },

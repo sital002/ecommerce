@@ -35,6 +35,7 @@ model Product {
     id          String   @id @default(cuid())
     name        String
     createdAt   DateTime @default(now())
+    description String
     price       Float
     url         String
     updatedAt   DateTime @updatedAt
