@@ -17,15 +17,7 @@ import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Badge } from "~/components/ui/badge";
-import {
-  CalendarDays,
-  Mail,
-  User,
-  Lock,
-  ShieldCheck,
-  Package,
-  Star,
-} from "lucide-react";
+import { Mail, User, Lock, ShieldCheck, Package, Star } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 
 interface ProfilePageProps {
@@ -62,6 +54,7 @@ export default function ProfilePage({ user }: ProfilePageProps) {
             <div>
               <CardTitle className="text-2xl">{user.name}</CardTitle>
               <CardDescription>{user.email}</CardDescription>
+
               <div className="mt-2 flex space-x-2">
                 <Badge variant="secondary">{user.role}</Badge>
                 <Badge
@@ -108,15 +101,17 @@ export default function ProfilePage({ user }: ProfilePageProps) {
                   <div className="flex items-center space-x-4">
                     <Mail className="text-gray-500" />
                     <span>{user.email}</span>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <CalendarDays className="text-gray-500" />
-                    <span>
-                      Email Verified:{" "}
-                      {user.emailVerified
-                        ? user.emailVerified.toLocaleDateString()
-                        : "Not verified"}
-                    </span>
+                    <Badge
+                      className="uppercase"
+                      variant={user.emailVerified ? "default" : "destructive"}
+                    >
+                      {user.emailVerified ? "VERIFIED" : "NOT VERIFIED"}
+                    </Badge>
+                    {user.emailVerified ? null : (
+                      <Button variant="outline" size="sm">
+                        Send Verification Email
+                      </Button>
+                    )}
                   </div>
                   <div className="flex items-center space-x-4">
                     <Lock className="text-gray-500" />
