@@ -7,6 +7,7 @@ import { Card, CardContent, CardFooter } from "~/components/ui/card";
 import { api } from "~/trpc/server";
 import { type inferRouterOutputs } from "@trpc/server";
 import { type AppRouter } from "~/server/api/root";
+import Image from "next/image";
 
 const categories = [
   { name: "Electronics", icon: "💻" },
@@ -139,10 +140,12 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-0">
-        <img
+        <Image
           src={
             "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D"
           }
+          width={300}
+          height={300}
           alt={product.name}
           className="h-48 w-full object-cover"
         />

@@ -2,6 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import type { inferProcedureOutput } from "@trpc/server";
+import Image from "next/image";
 import type { AppRouter } from "~/server/api/root";
 
 type Product = inferProcedureOutput<AppRouter["product"]["get"]>[number];
@@ -11,7 +12,13 @@ export const columns: ColumnDef<Product>[] = [
     accessorKey: "image",
     header: "Image",
     cell: ({ row }) => (
-      <img src={row.original.url} alt={row.original.name} className="w-5" />
+      <Image
+        width={30}
+        height={30}
+        src={row.original.url}
+        alt={row.original.name}
+        className="w-5"
+      />
     ),
   },
   {
