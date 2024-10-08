@@ -19,6 +19,7 @@ import { Card } from "~/components/ui/card";
 import Link from "next/link";
 import type { RouterInputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
+import { useQueryClient } from "@tanstack/react-query";
 const formSchema = z
   .object({
     name: z
@@ -109,7 +110,14 @@ export default function SignUpForm({
       confirm_password: "",
     },
   });
-  const signUpMutation = api.user.create.useMutation();
+  const queryClient = useQueryClient();
+  const signUpMutation = api.user.create.useMutation({
+    onSuccess: () => {
+      return queryClient.invalidateQueries({
+        queryKey: ["user.get"],
+      });
+    },
+  });
   function onSubmit(data: z.infer<typeof formSchema>) {
     signUpMutation.mutate({
       email: data.email,

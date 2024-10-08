@@ -13,11 +13,9 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Badge } from "~/components/ui/badge";
-import { Mail, User, Lock, ShieldCheck, Package, Star } from "lucide-react";
+import { Mail, User, Lock, CalendarDays } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 
 interface ProfilePageProps {
@@ -49,7 +47,9 @@ export default function ProfilePage({ user }: ProfilePageProps) {
           <div className="flex items-center space-x-4">
             <Avatar className="h-20 w-20">
               <AvatarImage src={user?.image ?? ""} alt={user?.name ?? ""} />
-              <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+              <AvatarFallback className="text-xl font-bold uppercase">
+                {user.name?.slice(0, 2)}
+              </AvatarFallback>
             </Avatar>
             <div>
               <CardTitle className="text-2xl">{user.name}</CardTitle>
@@ -69,13 +69,13 @@ export default function ProfilePage({ user }: ProfilePageProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="info" className="w-full">
+          <Tabs defaultValue="personal_info" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="info">Personal Info</TabsTrigger>
-              <TabsTrigger value="products">Products</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews</TabsTrigger>
+              <TabsTrigger value="personal_info">Personal Info</TabsTrigger>
+              <TabsTrigger value="shop_info">Shop Info</TabsTrigger>
+              <TabsTrigger value="documents">Documents</TabsTrigger>
             </TabsList>
-            <TabsContent value="info">
+            <TabsContent value="personal_info">
               <Card>
                 <CardHeader>
                   <CardTitle>Personal Information</CardTitle>
@@ -114,6 +114,13 @@ export default function ProfilePage({ user }: ProfilePageProps) {
                     )}
                   </div>
                   <div className="flex items-center space-x-4">
+                    <CalendarDays className="text-gray-500" />
+                    <Badge variant="default">
+                      <span>Joined {user.createdAt.toDateString()}</span>
+                    </Badge>
+                    {/* <span>Joined {user.createdAt.toLocaleDateString()}</span> */}
+                  </div>
+                  <div className="flex items-center space-x-4">
                     <Lock className="text-gray-500" />
                     <span>Password: ********</span>
                     {!isEditing && (
@@ -121,22 +128,6 @@ export default function ProfilePage({ user }: ProfilePageProps) {
                         Change Password
                       </Button>
                     )}
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <ShieldCheck className="text-gray-500" />
-                    <span>Role: {user.role}</span>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <Label htmlFor="account-status">Account Status:</Label>
-                    <Switch
-                      id="account-status"
-                      checked={user.accountStatus === "ACTIVE"}
-                      onCheckedChange={() => {
-                        console.log("Toggled");
-                      }}
-                      disabled={!isEditing}
-                    />
-                    <span>{user.accountStatus}</span>
                   </div>
                 </CardContent>
                 <CardFooter>
@@ -148,60 +139,29 @@ export default function ProfilePage({ user }: ProfilePageProps) {
                 </CardFooter>
               </Card>
             </TabsContent>
-            <TabsContent value="products">
+            <TabsContent value="shop_info">
               <Card>
                 <CardHeader>
-                  <CardTitle>Your Products</CardTitle>
+                  <CardTitle>Shop Information</CardTitle>
                   <CardDescription>
-                    Products you&apos;ve added to the platform
+                    View and edit your shop details
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {user.products.map((product) => (
-                      <div
-                        key={product.id}
-                        className="flex items-center justify-between border-b pb-2"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <Package className="text-gray-500" />
-                          <span>{product.name}</span>
-                        </div>
-                        <span>${product.price.toFixed(2)}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <div className="space-y-4"></div>
                 </CardContent>
-                <CardFooter>
-                  <Button>Add New Product</Button>
-                </CardFooter>
               </Card>
             </TabsContent>
-            <TabsContent value="reviews">
+            <TabsContent value="documents">
               <Card>
                 <CardHeader>
-                  <CardTitle>Your Reviews</CardTitle>
+                  <CardTitle>Your Documents</CardTitle>
                   <CardDescription>
-                    Reviews you&apos;ve left on products
+                    View and upload your documents
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {user.reviews.map((review) => (
-                      <div key={review.id} className="border-b pb-2">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{review.rating}</span>
-                          <div className="flex items-center">
-                            <Star className="mr-1 h-4 w-4 text-yellow-400" />
-                            <span>{review.rating}/5</span>
-                          </div>
-                        </div>
-                        <p className="mt-1 text-sm text-gray-500">
-                          {review.content}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
+                  <div className="space-y-4"></div>
                 </CardContent>
               </Card>
             </TabsContent>

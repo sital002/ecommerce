@@ -135,7 +135,12 @@ export default function LoginForm({ title, description }: LoginFormProps) {
         disabled={loading}
         className="w-full"
         variant={"outline"}
-        onClick={() => signIn("github")}
+        onClick={() =>
+          signIn("github", {
+            callbackUrl: "/dashboard",
+            redirect: false,
+          })
+        }
       >
         Signin with Github
       </Button>

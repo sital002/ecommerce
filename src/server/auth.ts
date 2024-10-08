@@ -44,19 +44,36 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
       }
+      if (account?.provider === "github" && token.email) {
+        const existingUser = await db.user.findUnique({
+          where: { email: token.email },
+        });
+        if (existingUser) {
+          token.id = existingUser.id;
+          token.role = existingUser.role;
+        } else {
+          token.role = "USER";
+        }
+      }
       return token;
     },
+
     async session({ session, token }) {
+      const user = await db.user.findUnique({
+        where: { email: token.email! },
+      });
+      if (user) {
+        session.user.role = user.role;
+      }
       if (token) {
         session.user.id = token.id as string;
         session.user.email = token.email;
-        session.user.name = token.name;
       }
       return session;
     },

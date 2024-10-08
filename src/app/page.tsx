@@ -135,15 +135,15 @@ export default async function Homepage() {
 }
 
 type Product = inferRouterOutputs<AppRouter>["product"]["get"][number];
+const testURL =
+  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D";
 
 function ProductCard({ product }: { product: Product }) {
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-0">
         <Image
-          src={
-            "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D"
-          }
+          src={product.url || testURL}
           width={300}
           height={300}
           alt={product.name}

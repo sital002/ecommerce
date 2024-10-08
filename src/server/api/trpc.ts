@@ -142,3 +142,13 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+export const adminProcedure = protectedProcedure.use(async (opts) => {
+  const { ctx } = opts;
+  if (ctx.session.user.role !== "ADMIN") {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "You aren't admin" });
+  }
+  return opts.next({
+    ctx,
+  });
+});

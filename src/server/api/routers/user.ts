@@ -6,16 +6,36 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import brcypt from "bcrypt";
+import { ACCOUNT_STATUS, ROLE } from "@prisma/client";
 export const userRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.user.findUnique({
       where: { id: ctx.session.user.id },
-      include: {
-        reviews: true,
-        products: true,
-      },
     });
   }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        role: z.nativeEnum(ROLE),
+        emailVerified: z.boolean(),
+        accountStatus: z.nativeEnum(ACCOUNT_STATUS),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.user.update({
+        where: {
+          id: ctx.session.user.id,
+        },
+        data: {
+          name: input.name,
+          role: input.role,
+          emailVerified: input.emailVerified ? new Date() : null,
+          accountStatus: input.accountStatus,
+        },
+      });
+    }),
 
   create: publicProcedure
     .input(
@@ -25,7 +45,7 @@ export const userRouter = createTRPCRouter({
           email: z.string().email(),
           password: z.string().min(8).max(64),
           confirmPassword: z.string(),
-          role: z.enum(["USER", "VENDOR"]).default("USER"),
+          role: z.nativeEnum(ROLE).default("USER"),
         })
         .refine((data) => data.password === data.confirmPassword, {
           message: "Passwords do not match",

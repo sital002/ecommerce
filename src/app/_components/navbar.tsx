@@ -5,12 +5,19 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { SignOutButton } from "./auth-button";
 import { getServerAuthSession } from "~/server/auth";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "~/components/ui/sheet";
+import Sidebar from "../dashboard/_components/sidebar";
 
 export default async function Navbar() {
   const session = await getServerAuthSession();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-b-gray-500 bg-white shadow-sm">
+    <header className="sticky top-0 z-50 border-b border-b-gray-200 bg-white shadow-sm">
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <Link href="/" className="text-xl font-bold text-primary">
           ShopSmart
@@ -50,10 +57,22 @@ export default async function Navbar() {
             </>
           )}
         </div>
-        <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">Menu</span>
-        </Button>
+        <div className="md:hidden">
+          <Sheet>
+            <SheetTrigger>
+              <Button variant="ghost" size="icon" asChild>
+                <>
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Menu</span>
+                </>
+              </Button>
+              <SheetContent>
+                <SheetTitle></SheetTitle>
+                <Sidebar />
+              </SheetContent>
+            </SheetTrigger>
+          </Sheet>
+        </div>
       </div>
     </header>
   );
