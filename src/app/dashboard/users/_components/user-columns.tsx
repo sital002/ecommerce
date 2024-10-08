@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Button } from "~/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, TowerControl } from "lucide-react";
 import {
   Dialog,
   DialogTitle,
@@ -45,6 +45,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 type User = NonNullable<RouterOutputs["user"]["get"]>;
 export const userColumns: ColumnDef<User>[] = [
@@ -103,8 +104,9 @@ interface ActionsProps {
   user: User;
 }
 function Actions({ user }: ActionsProps) {
+  const [dropDownOpen, setDropDownOpen] = useState(false);
   return (
-    <DropdownMenu>
+    <DropdownMenu open={dropDownOpen} onOpenChange={setDropDownOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
           <span className="sr-only">Open menu</span>
@@ -114,17 +116,7 @@ function Actions({ user }: ActionsProps) {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <Dialog>
-          <DialogTrigger asChild>
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              Edit
-            </DropdownMenuItem>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogTitle></DialogTitle>
-            <EditUserDialog user={user} />
-          </DialogContent>
-        </Dialog>
+        <EditUserDialog user={user} />
         <Dialog>
           <DialogTrigger asChild>
             <DropdownMenuItem
@@ -170,6 +162,8 @@ interface ActionsProps {
   user: User;
 }
 function EditUserDialog({ user }: ActionsProps) {
+  const [open, setOpen] = useState(false);
+
   async function onSubmit(data: z.infer<typeof formSchema>) {
     editUserMutation.mutate({
       name: data.name,
@@ -179,10 +173,14 @@ function EditUserDialog({ user }: ActionsProps) {
       role: data.role,
     });
   }
+
   const router = useRouter();
+  const utils = api.useUtils();
   const editUserMutation = api.admin.updateUser.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
+      setOpen(false);
       router.refresh();
+      await utils.admin.getAllUsers.refetch();
     },
   });
 
@@ -197,123 +195,130 @@ function EditUserDialog({ user }: ActionsProps) {
     },
   });
   return (
-    <>
-      {/* // <p className="text-destructive">{""}</p> */}
-      {/* <p>Update Detail</p> */}
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-          <FormField
-            control={form.control}
-            name={"name"}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{"Name"}</FormLabel>
-                <FormControl>
-                  <Input placeholder={"John Doe"} type={"text"} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={"email"}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{"Email"}</FormLabel>
-                <FormControl>
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      placeholder={"johndoe@gmail.com"}
-                      type={"text"}
-                      {...field}
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={"emailVerified"}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="emailVerified"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                    <Label htmlFor="emailVerified">Email Verified</Label>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          Edit
+        </DropdownMenuItem>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogTitle></DialogTitle>
 
-          <FormField
-            control={form.control}
-            name={"accountStatus"}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{"Account Status"}</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select a fruit" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="SUSPENDED">SUSPENDED</SelectItem>
-                        <SelectItem value="ACTIVE">ACTIVE</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={"role"}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{"Role"}</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select a fruit" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="ADMIN">ADMIN</SelectItem>
-                        <SelectItem value="USER">USER</SelectItem>
-                        <SelectItem value="VENDOR">VENDOR</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+            <FormField
+              control={form.control}
+              name={"name"}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Name"}</FormLabel>
+                  <FormControl>
+                    <Input placeholder={"John Doe"} type={"text"} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={"email"}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Email"}</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        placeholder={"johndoe@gmail.com"}
+                        type={"text"}
+                        {...field}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={"emailVerified"}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="emailVerified"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                      <Label htmlFor="emailVerified">Email Verified</Label>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <Button type="submit" className="w-full">
-            Update
-          </Button>
-        </form>
-      </Form>
-    </>
+            <FormField
+              control={form.control}
+              name={"accountStatus"}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Account Status"}</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select a fruit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="SUSPENDED">SUSPENDED</SelectItem>
+                          <SelectItem value="ACTIVE">ACTIVE</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={"role"}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Role"}</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select a fruit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="ADMIN">ADMIN</SelectItem>
+                          <SelectItem value="USER">USER</SelectItem>
+                          <SelectItem value="VENDOR">VENDOR</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full">
+              Update
+            </Button>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
