@@ -1,7 +1,7 @@
 "use client";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { api, type RouterOutputs } from "~/trpc/react";
+import { api, type RouterInputs, type RouterOutputs } from "~/trpc/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Button } from "~/components/ui/button";
-import { MoreHorizontal, TowerControl } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import {
   Dialog,
   DialogTitle,
@@ -46,6 +46,7 @@ import {
 } from "~/components/ui/select";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ROLE } from "@prisma/client";
 
 type User = NonNullable<RouterOutputs["user"]["get"]>;
 export const userColumns: ColumnDef<User>[] = [
@@ -132,7 +133,7 @@ function Actions({ user }: ActionsProps) {
     </DropdownMenu>
   );
 }
-// type Account = RouterInputs["user"]["update"]["accountStatus"];
+
 const formSchema = z.object({
   name: z
     .string()
@@ -154,8 +155,7 @@ const formSchema = z.object({
 
   accountStatus: z.enum(["ACTIVE", "SUSPENDED"]),
   emailVerified: z.boolean(),
-  role: z.enum(["USER", "VENDOR", "ADMIN"]),
-  // role: z.eum(),
+  role: z.nativeEnum(ROLE),
 });
 
 interface ActionsProps {

@@ -6,5 +6,5 @@ import SignUpForm from "../_components/signup-form";
 export default async function page() {
   const session = await getServerAuthSession();
   if (session) redirect("/dashboard");
-  return <SignUpForm title="Become a Seller" role="VENDOR" />;
+  return <SignUpForm />;
 }

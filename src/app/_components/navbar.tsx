@@ -45,8 +45,8 @@ export default async function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/signin">
-                <Button variant={"link"}>Beome a Seller</Button>
+              <Link href="/join-us">
+                <Button variant={"link"}>Become our partner</Button>
               </Link>
               <Link href="/signin">
                 <Button>Sign In</Button>

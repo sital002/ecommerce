@@ -45,7 +45,12 @@ export const userRouter = createTRPCRouter({
           email: z.string().email(),
           password: z.string().min(8).max(64),
           confirmPassword: z.string(),
-          role: z.nativeEnum(ROLE).default("USER"),
+          role: z
+            .nativeEnum(ROLE)
+            .refine((role) => role !== "ADMIN", {
+              message: "Cannot assign ADMIN role",
+            })
+            .default("USER"),
         })
         .refine((data) => data.password === data.confirmPassword, {
           message: "Passwords do not match",

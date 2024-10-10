@@ -17,9 +17,8 @@ import { Input } from "~/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card } from "~/components/ui/card";
 import Link from "next/link";
-import type { RouterInputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
 const formSchema = z
   .object({
     name: z
@@ -55,9 +54,7 @@ const formSchema = z
   });
 
 interface SignUpFormProps {
-  title: string;
   description?: string;
-  role: RouterInputs["user"]["create"]["role"];
 }
 
 type FormOptions = {
@@ -96,11 +93,22 @@ const formOptions: FormOptions[] = [
     type: "password",
   },
 ];
-export default function SignUpForm({
-  title,
-  description,
-  role,
-}: SignUpFormProps) {
+
+const partnerOptions = {
+  "delivery-person": "Become a delivery person",
+  seller: "Become a Seller",
+};
+export default function SignUpForm({ description }: SignUpFormProps) {
+  const joinasPartner = useSearchParams().get("partner");
+  const title =
+    partnerOptions[joinasPartner as keyof typeof partnerOptions] ?? "Signup";
+  const role =
+    joinasPartner === "seller"
+      ? "VENDOR"
+      : joinasPartner === "delivery-person"
+        ? "DELIVERY_PERSON"
+        : "USER";
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -110,12 +118,12 @@ export default function SignUpForm({
       confirm_password: "",
     },
   });
-  const queryClient = useQueryClient();
+  const utils = api.useUtils();
+  const router = useRouter();
   const signUpMutation = api.user.create.useMutation({
-    onSuccess: () => {
-      return queryClient.invalidateQueries({
-        queryKey: ["user.get"],
-      });
+    onSuccess: async () => {
+      await utils.user.get.refetch();
+      router.replace("/dashboard");
     },
   });
   function onSubmit(data: z.infer<typeof formSchema>) {
