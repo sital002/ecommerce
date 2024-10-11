@@ -49,7 +49,7 @@ import { useState } from "react";
 import { ROLE } from "@prisma/client";
 
 type User = NonNullable<RouterOutputs["user"]["get"]>;
-export const userColumns: ColumnDef<User>[] = [
+export const vendorColumns: ColumnDef<User>[] = [
   {
     accessorKey: "avatar",
     header: "Avatar",

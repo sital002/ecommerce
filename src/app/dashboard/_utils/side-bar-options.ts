@@ -40,6 +40,12 @@ export const sidebarOptions: ISidebar[] = [
     role: ["ADMIN"],
   },
   {
+    title: "Approve vendors",
+    icon: "users",
+    href: "/dashboard/vendors",
+    role: ["ADMIN"],
+  },
+  {
     title: "Reports",
     icon: "bar-chart-2",
     href: "/dashboard/reports",
@@ -70,7 +76,7 @@ export const sidebarOptions: ISidebar[] = [
     role: ["ADMIN", "VENDOR"],
   },
   {
-    title: "Delivery Person",
+    title: "Approve Delivery Person",
     icon: "users",
     href: "/dashboard/delivery-person",
     role: ["ADMIN"],

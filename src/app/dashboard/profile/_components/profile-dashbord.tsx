@@ -21,7 +21,7 @@ import type { RouterOutputs } from "~/trpc/react";
 interface ProfilePageProps {
   user: NonNullable<RouterOutputs["user"]["get"]>;
 }
-export default function ProfilePage({ user }: ProfilePageProps) {
+export default function ProfileDashboard({ user }: ProfilePageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState(user);
 
