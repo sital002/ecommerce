@@ -24,6 +24,9 @@ export const env = createEnv({
     ),
     GITHUB_CLIENT_ID: z.string(),
     GITHUB_CLIENT_SECRET: z.string(),
+    NODEMAILER_EMAIL_USER: z.string(),
+    NODEMAILER_EMAIL_PASSWORD: z.string(),
+    NODEMAILER_EMAIL_SENDER: z.string(),
   },
 
   /**
@@ -46,6 +49,9 @@ export const env = createEnv({
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
+    NODEMAILER_EMAIL_SENDER: process.env.NODEMAILER_EMAIL_SENDER,
+    NODEMAILER_EMAIL_PASSWORD: process.env.NODEMAILER_EMAIL_PASSWORD,
+    NODEMAILER_EMAIL_USER: process.env.NODEMAILER_EMAIL_USER,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

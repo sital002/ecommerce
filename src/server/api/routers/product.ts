@@ -23,11 +23,17 @@ export const productRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const user = ctx.session.user;
-      if (user.role === "USER")
+      if (user.role !== "VENDOR")
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not authorized to create products",
         });
+      if (!user.shop) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You need to create a shop first",
+        });
+      }
       return db.product.create({
         data: {
           name: input.name,
@@ -35,6 +41,7 @@ export const productRouter = createTRPCRouter({
           description: input.description,
           url: input.image,
           createdById: user.id,
+          shopId: user.shop.id,
         },
       });
     }),

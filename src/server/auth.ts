@@ -1,5 +1,5 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import type { ROLE } from "@prisma/client";
+import type { ROLE, Shop } from "@prisma/client";
 import {
   getServerSession,
   type DefaultSession,
@@ -25,6 +25,7 @@ declare module "next-auth" {
       id: string;
       // ...other properties
       role: ROLE;
+      shop?: Shop;
     } & DefaultSession["user"];
   }
 
@@ -67,9 +68,13 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       const user = await db.user.findUnique({
         where: { email: token.email! },
+        include: {
+          shop: true,
+        },
       });
       if (user) {
         session.user.role = user.role;
+        session.user.shop = user?.shop ?? undefined;
       }
       if (token) {
         session.user.id = token.id as string;

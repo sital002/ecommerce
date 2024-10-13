@@ -41,4 +41,25 @@ export const adminRouter = createTRPCRouter({
         },
       });
     }),
+
+  getPendingShops: adminProcedure.query(async ({ ctx }) => {
+    return ctx.db.shop.findMany({
+      where: { status: "PENDING" },
+      include: { user: true },
+    });
+  }),
+  getAllShops: adminProcedure.query(async ({ ctx }) => {
+    return ctx.db.shop.findMany();
+  }),
+  getShopById: adminProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.db.shop.findUnique({
+        where: { id: input.id },
+      });
+    }),
 });
