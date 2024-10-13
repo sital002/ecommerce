@@ -27,6 +27,7 @@ export const env = createEnv({
     NODEMAILER_EMAIL_USER: z.string(),
     NODEMAILER_EMAIL_PASSWORD: z.string(),
     NODEMAILER_EMAIL_SENDER: z.string(),
+    UPLOADTHING_TOKEN: z.string(),
   },
 
   /**
@@ -52,6 +53,7 @@ export const env = createEnv({
     NODEMAILER_EMAIL_SENDER: process.env.NODEMAILER_EMAIL_SENDER,
     NODEMAILER_EMAIL_PASSWORD: process.env.NODEMAILER_EMAIL_PASSWORD,
     NODEMAILER_EMAIL_USER: process.env.NODEMAILER_EMAIL_USER,
+    UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

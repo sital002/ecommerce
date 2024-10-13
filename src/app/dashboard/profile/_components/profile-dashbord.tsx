@@ -12,11 +12,22 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Badge } from "~/components/ui/badge";
 import { Mail, User, Lock, CalendarDays } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 interface ProfilePageProps {
   user: NonNullable<RouterOutputs["user"]["get"]>;
@@ -118,7 +129,6 @@ export default function ProfileDashboard({ user }: ProfilePageProps) {
                     <Badge variant="default">
                       <span>Joined {user.createdAt.toDateString()}</span>
                     </Badge>
-                    {/* <span>Joined {user.createdAt.toLocaleDateString()}</span> */}
                   </div>
                   <div className="flex items-center space-x-4">
                     <Lock className="text-gray-500" />
@@ -148,7 +158,7 @@ export default function ProfileDashboard({ user }: ProfilePageProps) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4"></div>
+                  <ShopInfo />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -168,6 +178,81 @@ export default function ProfileDashboard({ user }: ProfilePageProps) {
           </Tabs>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+const shopSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  address: z.string(),
+  logo: z.string(),
+  banner: z.string(),
+});
+function ShopInfo() {
+  const form = useForm<z.infer<typeof shopSchema>>({
+    resolver: zodResolver(shopSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      address: "",
+      logo: "",
+      banner: "",
+    },
+  });
+
+  const onSubmit = (data: z.infer<typeof shopSchema>) => {
+    console.log(data);
+  };
+  return (
+    <div className="space-y-4">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+          <FormField
+            control={form.control}
+            name={"name"}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{"Enter your Shop Name"}</FormLabel>
+                <FormControl>
+                  <Input placeholder={"ABC"} type={"text"} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={"description"}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{"Enter your Shop description"}</FormLabel>
+                <FormControl>
+                  <Input placeholder={"ABC"} type={"text"} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name={"address"}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{"Enter your Address"}</FormLabel>
+                <FormControl>
+                  <Input placeholder={"Chitwan"} type={"text"} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-full">
+            Submit
+          </Button>
+        </form>
+      </Form>
     </div>
   );
 }
