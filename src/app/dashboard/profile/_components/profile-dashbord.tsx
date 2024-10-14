@@ -16,7 +16,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Badge } from "~/components/ui/badge";
 import { Mail, User, Lock, CalendarDays } from "lucide-react";
-import type { RouterOutputs } from "~/trpc/react";
+import { api, type RouterOutputs } from "~/trpc/react";
 import {
   Form,
   FormControl,
@@ -28,7 +28,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { set, z } from "zod";
+import { z } from "zod";
 import type { OurFileRouter } from "~/app/api/uploadthing/core";
 import Image from "next/image";
 
@@ -202,6 +202,17 @@ function ShopInfo() {
   const [ownerImage, setOwnerImage] = useState("");
   const [citizenshipImage, setCitizenshipImage] = useState("");
   const [errorUploading, setErrorUploading] = useState("");
+
+  const deleteImageMutation = api.file.delete.useMutation({
+    onSuccess: (data) => {
+      setOwnerImage("");
+      setCitizenshipImage("");
+      console.log("data", data);
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
   const form = useForm<z.infer<typeof shopSchema>>({
     resolver: zodResolver(shopSchema),
     defaultValues: {
@@ -265,60 +276,79 @@ function ShopInfo() {
           />
           <p>Owner Image</p>
 
-          {ownerImage && (
-            <Image
-              src={ownerImage}
-              width={300}
-              height={300}
-              alt="Owner image"
+          {ownerImage ? (
+            <div className="flex items-center gap-2">
+              <Image
+                src={ownerImage}
+                width={300}
+                height={300}
+                alt="Owner image"
+              />
+              <Button
+                onClick={() => {
+                  deleteImageMutation.mutate({ id: ownerImage });
+                }}
+              >
+                Delete
+              </Button>
+            </div>
+          ) : (
+            <UploadButton
+              endpoint="imageUploader"
+              onUploadBegin={() => {
+                setIsUploading(true);
+              }}
+              onClientUploadComplete={(res) => {
+                // Do something with the response
+                console.log("Files: ", res);
+                setOwnerImage(res[0]?.url ?? "");
+                setIsUploading(false);
+              }}
+              onUploadError={(error: Error) => {
+                // Do something with the error.
+                // alert(`ERROR! ${error.message}`);
+                setIsUploading(false);
+                setErrorUploading(error.message);
+              }}
             />
           )}
-          <UploadButton
-            endpoint="imageUploader"
-            onUploadBegin={() => {
-              setIsUploading(true);
-            }}
-            onClientUploadComplete={(res) => {
-              // Do something with the response
-              console.log("Files: ", res);
-              setOwnerImage(res[0]?.url ?? "");
-              setIsUploading(false);
-            }}
-            onUploadError={(error: Error) => {
-              // Do something with the error.
-              // alert(`ERROR! ${error.message}`);
-              setIsUploading(false);
-              setErrorUploading(error.message);
-            }}
-          />
           <p>Citizenship Image</p>
-
-          {citizenshipImage && (
-            <Image
-              src={citizenshipImage}
-              width={300}
-              height={300}
-              alt="Citizenship image"
+          {citizenshipImage ? (
+            <div className="flex items-center gap-2">
+              <Image
+                src={citizenshipImage}
+                width={300}
+                height={300}
+                alt="Citizenship image"
+              />
+              <Button
+                onClick={() => {
+                  deleteImageMutation.mutate({ id: citizenshipImage });
+                }}
+              >
+                Delete
+              </Button>
+            </div>
+          ) : (
+            <UploadButton
+              endpoint="imageUploader"
+              onClientUploadComplete={(res) => {
+                // Do something with the response
+                console.log("Files: ", res);
+                setCitizenshipImage(res[0]?.url ?? "");
+                setIsUploading(false);
+              }}
+              onUploadBegin={() => {
+                setIsUploading(true);
+              }}
+              onUploadError={(error: Error) => {
+                // Do something with the error.
+                // alert(`ERROR! ${error.message}`);
+                setIsUploading(false);
+                setErrorUploading(error.message);
+              }}
             />
           )}
-          <UploadButton
-            endpoint="imageUploader"
-            onClientUploadComplete={(res) => {
-              // Do something with the response
-              console.log("Files: ", res);
-              setCitizenshipImage(res[0]?.url ?? "");
-              setIsUploading(false);
-            }}
-            onUploadBegin={() => {
-              setIsUploading(true);
-            }}
-            onUploadError={(error: Error) => {
-              // Do something with the error.
-              // alert(`ERROR! ${error.message}`);
-              setIsUploading(false);
-              setErrorUploading(error.message);
-            }}
-          />
           <Button type="submit" className="w-full" disabled={isUploading}>
             Submit
           </Button>
