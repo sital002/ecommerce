@@ -4,6 +4,7 @@ import type { ChangeEvent } from "react";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { generateUploadButton } from "@uploadthing/react";
 import {
   Card,
   CardContent,
@@ -27,7 +28,9 @@ import {
 import { Input } from "~/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { set, z } from "zod";
+import type { OurFileRouter } from "~/app/api/uploadthing/core";
+import Image from "next/image";
 
 interface ProfilePageProps {
   user: NonNullable<RouterOutputs["user"]["get"]>;
@@ -81,10 +84,13 @@ export default function ProfileDashboard({ user }: ProfilePageProps) {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="personal_info" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="personal_info">Personal Info</TabsTrigger>
-              <TabsTrigger value="shop_info">Shop Info</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
+
+              {user.role === "VENDOR" && (
+                <TabsTrigger value="shop_info">Shop Info</TabsTrigger>
+              )}
+              {/* <TabsTrigger value="documents">Documents</TabsTrigger> */}
             </TabsList>
             <TabsContent value="personal_info">
               <Card>
@@ -188,16 +194,24 @@ const shopSchema = z.object({
   address: z.string(),
   logo: z.string(),
   banner: z.string(),
+  your_image: z.string(),
+  categories: z.array(z.string()),
 });
 function ShopInfo() {
+  const [isUploading, setIsUploading] = useState(false);
+  const [ownerImage, setOwnerImage] = useState("");
+  const [citizenshipImage, setCitizenshipImage] = useState("");
+  const [errorUploading, setErrorUploading] = useState("");
   const form = useForm<z.infer<typeof shopSchema>>({
     resolver: zodResolver(shopSchema),
     defaultValues: {
       name: "",
+      your_image: "",
       description: "",
       address: "",
       logo: "",
       banner: "",
+      categories: [],
     },
   });
 
@@ -206,6 +220,7 @@ function ShopInfo() {
   };
   return (
     <div className="space-y-4">
+      <p>{errorUploading}</p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
           <FormField
@@ -248,7 +263,63 @@ function ShopInfo() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full">
+          <p>Owner Image</p>
+
+          {ownerImage && (
+            <Image
+              src={ownerImage}
+              width={300}
+              height={300}
+              alt="Owner image"
+            />
+          )}
+          <UploadButton
+            endpoint="imageUploader"
+            onUploadBegin={() => {
+              setIsUploading(true);
+            }}
+            onClientUploadComplete={(res) => {
+              // Do something with the response
+              console.log("Files: ", res);
+              setOwnerImage(res[0]?.url ?? "");
+              setIsUploading(false);
+            }}
+            onUploadError={(error: Error) => {
+              // Do something with the error.
+              // alert(`ERROR! ${error.message}`);
+              setIsUploading(false);
+              setErrorUploading(error.message);
+            }}
+          />
+          <p>Citizenship Image</p>
+
+          {citizenshipImage && (
+            <Image
+              src={citizenshipImage}
+              width={300}
+              height={300}
+              alt="Citizenship image"
+            />
+          )}
+          <UploadButton
+            endpoint="imageUploader"
+            onClientUploadComplete={(res) => {
+              // Do something with the response
+              console.log("Files: ", res);
+              setCitizenshipImage(res[0]?.url ?? "");
+              setIsUploading(false);
+            }}
+            onUploadBegin={() => {
+              setIsUploading(true);
+            }}
+            onUploadError={(error: Error) => {
+              // Do something with the error.
+              // alert(`ERROR! ${error.message}`);
+              setIsUploading(false);
+              setErrorUploading(error.message);
+            }}
+          />
+          <Button type="submit" className="w-full" disabled={isUploading}>
             Submit
           </Button>
         </form>
@@ -256,3 +327,5 @@ function ShopInfo() {
     </div>
   );
 }
+
+export const UploadButton = generateUploadButton<OurFileRouter>();
