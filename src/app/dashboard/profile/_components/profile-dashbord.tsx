@@ -16,7 +16,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Badge } from "~/components/ui/badge";
 import { Mail, User, Lock, CalendarDays } from "lucide-react";
-import { type RouterOutputs } from "~/trpc/react";
+import { api, type RouterOutputs } from "~/trpc/react";
 import {
   Form,
   FormControl,
@@ -196,7 +196,7 @@ const shopSchema = z.object({
   address: z.string(),
   logo: z.string(),
   banner: z.string(),
-  your_image: z.string(),
+  phone: z.string(),
   categories: z.array(z.string()),
 });
 function ShopInfo() {
@@ -208,20 +208,44 @@ function ShopInfo() {
     resolver: zodResolver(shopSchema),
     defaultValues: {
       name: "",
-      your_image: "",
       description: "",
       address: "",
       logo: "",
       banner: "",
+      phone: "",
       categories: [],
     },
   });
+  const shopMutation = api.shop.create.useMutation({
+    onSuccess: (data) => {
+      console.log(data);
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
 
+  form.watch();
   const onSubmit = (data: z.infer<typeof shopSchema>) => {
     console.log(data);
+    if (!ownerImage || !citizenshipImage) return;
+    shopMutation.mutate({
+      address: data.address,
+      banner: data.banner,
+      categories: data.categories,
+      description: data.description,
+      logo: data.logo,
+      name: data.name,
+      ownerImage: ownerImage.appUrl,
+      phone: data.phone,
+      citizenshipImage: citizenshipImage.appUrl,
+    });
   };
   return (
     <div className="space-y-4">
+      {shopMutation.error && (
+        <div className="text-destructive">{shopMutation.error.message}</div>
+      )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
           <FormField
@@ -264,6 +288,9 @@ function ShopInfo() {
               </FormItem>
             )}
           />
+          <Button type="submit" className="w-full">
+            Save
+          </Button>
         </form>
       </Form>
       <p>Owner Image</p>
@@ -337,9 +364,6 @@ function ShopInfo() {
           <button type="submit">Upload</button>
         </form>
       )}
-      <Button type="submit" className="w-full">
-        Save
-      </Button>
     </div>
   );
 }

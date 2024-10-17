@@ -108,19 +108,20 @@ model User {
 }
 
 model Shop {
-    id          String    @id @default(cuid())
-    name        String
-    description String
-    address     String
-    phone       String
-    email       String
-    logo        String
-    user        User      @relation(fields: [userId], references: [id])
-    userId      String    @unique
-    products    Product[]
-    status      STATUS    @default(PENDING)
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @updatedAt
+    id               String    @id @default(cuid())
+    name             String
+    description      String
+    address          String
+    phone            String
+    citizenShipImage String
+    ownerImage       String
+    logo             String
+    user             User      @relation(fields: [userId], references: [id])
+    userId           String    @unique
+    products         Product[]
+    status           STATUS    @default(PENDING)
+    createdAt        DateTime  @default(now())
+    updatedAt        DateTime  @updatedAt
 }
 
 model VerificationToken {
