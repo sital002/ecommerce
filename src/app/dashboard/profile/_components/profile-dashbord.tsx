@@ -31,7 +31,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import type { OurFileRouter } from "~/app/api/uploadthing/core";
 import Image from "next/image";
-import { deleteFiles, uploadFiles } from "./actions";
 import type { UploadedFileData } from "uploadthing/types";
 
 interface ProfilePageProps {
@@ -203,6 +202,10 @@ function ShopInfo() {
   const [ownerImage, setOwnerImage] = useState<UploadedFileData | null>(null);
   const [citizenshipImage, setCitizenshipImage] =
     useState<UploadedFileData | null>(null);
+  const [previewImage, setPreviewImage] = useState<{
+    citizenShipImage: string;
+    ownerImage: string;
+  } | null>(null);
 
   const form = useForm<z.infer<typeof shopSchema>>({
     resolver: zodResolver(shopSchema),
@@ -288,82 +291,92 @@ function ShopInfo() {
               </FormItem>
             )}
           />
+
+          <p>Owner Image</p>
+          {previewImage?.ownerImage ? (
+            <div className="flex items-center gap-2">
+              <Image
+                src={previewImage.ownerImage}
+                width={300}
+                height={300}
+                alt="Owner image"
+              />
+              <Button
+                onClick={() => {
+                  setPreviewImage((prev) => ({
+                    citizenShipImage: prev?.citizenShipImage ?? "",
+                    ownerImage: "",
+                  }));
+                }}
+              >
+                Delete
+              </Button>
+            </div>
+          ) : (
+            <input
+              name="files"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  const target = e.currentTarget as FileReader;
+                  setPreviewImage((prev) => ({
+                    citizenShipImage: prev?.citizenShipImage ?? "",
+                    ownerImage: target.result as string,
+                  }));
+                };
+                reader.readAsDataURL(file);
+              }}
+            />
+          )}
+          <p>Citizenship Image</p>
+          {previewImage?.citizenShipImage ? (
+            <div className="flex items-center gap-2">
+              <Image
+                src={previewImage.citizenShipImage}
+                width={300}
+                height={300}
+                alt="Citizenship image"
+              />
+              <Button
+                onClick={() => {
+                  setPreviewImage((prev) => ({
+                    citizenShipImage: "",
+                    ownerImage: prev?.ownerImage ?? "",
+                  }));
+                }}
+              >
+                Delete
+              </Button>
+            </div>
+          ) : (
+            <input
+              name="files"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  const target = e.currentTarget as FileReader;
+                  setPreviewImage((prev) => ({
+                    ownerImage: prev?.ownerImage ?? "",
+                    citizenShipImage: target.result as string,
+                  }));
+                };
+                reader.readAsDataURL(file);
+              }}
+            />
+          )}
           <Button type="submit" className="w-full">
             Save
           </Button>
         </form>
       </Form>
-      <p>Owner Image</p>
-      {ownerImage ? (
-        <div className="flex items-center gap-2">
-          <Image
-            src={ownerImage.appUrl}
-            width={300}
-            height={300}
-            alt="Owner image"
-          />
-          <Button
-            onClick={async () => {
-              const response = await deleteFiles(ownerImage.key);
-              if (response?.success) {
-                setOwnerImage(null);
-              }
-            }}
-          >
-            Delete
-          </Button>
-        </div>
-      ) : (
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target as HTMLFormElement);
-            const response = await uploadFiles(formData);
-            if (response?.[0]?.data) {
-              setOwnerImage(response[0].data);
-            }
-          }}
-        >
-          <input name="files" type="file" multiple />
-          <button type="submit">Upload</button>
-        </form>
-      )}
-      <p>Citizenship Image</p>
-      {citizenshipImage ? (
-        <div className="flex items-center gap-2">
-          <Image
-            src={citizenshipImage.url ?? ""}
-            width={300}
-            height={300}
-            alt="Citizenship image"
-          />
-          <Button
-            onClick={async () => {
-              const response = await deleteFiles(citizenshipImage.key);
-              console.log(response);
-              if (response?.success) {
-                setCitizenshipImage(null);
-              }
-            }}
-          >
-            Delete
-          </Button>
-        </div>
-      ) : (
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target as HTMLFormElement);
-            const response = await uploadFiles(formData);
-            if (response?.[0]?.data) {
-              setCitizenshipImage(response[0].data);
-            }
-          }}
-        >
-          <input name="files" type="file" multiple />
-          <button type="submit">Upload</button>
-        </form>
-      )}
     </div>
   );
 }
