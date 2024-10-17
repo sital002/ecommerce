@@ -28,9 +28,9 @@ import { sidebarOptions } from "../_utils/side-bar-options";
 // ];
 export default async function Sidebar() {
   const session = await getServerAuthSession();
-  if (!session) redirect("/=signin");
+  if (!session) redirect("/signin");
   return (
-    <aside className="sticky top-0 hidden h-screen w-64 overflow-y-auto p-4 md:block">
+    <aside className="sticky top-0 h-screen w-64 overflow-y-auto p-4">
       <nav>
         {sidebarOptions.map((option, index) => {
           if (option.role.includes(session.user.role))

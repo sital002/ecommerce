@@ -7,7 +7,9 @@ export default function Layout({
   return (
     <>
       <main className="flex">
-        <Sidebar />
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
         <div className="w-full border-l border-l-gray-200 p-2">
           <VerifyEmailAlert />
           <VerifyShopAlert />

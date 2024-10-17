@@ -16,7 +16,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Badge } from "~/components/ui/badge";
 import { Mail, User, Lock, CalendarDays } from "lucide-react";
-import { api, type RouterOutputs } from "~/trpc/react";
+import { type RouterOutputs } from "~/trpc/react";
 import {
   Form,
   FormControl,
@@ -31,6 +31,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import type { OurFileRouter } from "~/app/api/uploadthing/core";
 import Image from "next/image";
+import { deleteFiles, uploadFiles } from "./actions";
+import type { UploadedFileData } from "uploadthing/types";
 
 interface ProfilePageProps {
   user: NonNullable<RouterOutputs["user"]["get"]>;
@@ -198,21 +200,10 @@ const shopSchema = z.object({
   categories: z.array(z.string()),
 });
 function ShopInfo() {
-  const [isUploading, setIsUploading] = useState(false);
-  const [ownerImage, setOwnerImage] = useState("");
-  const [citizenshipImage, setCitizenshipImage] = useState("");
-  const [errorUploading, setErrorUploading] = useState("");
+  const [ownerImage, setOwnerImage] = useState<UploadedFileData | null>(null);
+  const [citizenshipImage, setCitizenshipImage] =
+    useState<UploadedFileData | null>(null);
 
-  const deleteImageMutation = api.file.delete.useMutation({
-    onSuccess: (data) => {
-      setOwnerImage("");
-      setCitizenshipImage("");
-      console.log("data", data);
-    },
-    onError: (error) => {
-      console.error(error);
-    },
-  });
   const form = useForm<z.infer<typeof shopSchema>>({
     resolver: zodResolver(shopSchema),
     defaultValues: {
@@ -231,7 +222,6 @@ function ShopInfo() {
   };
   return (
     <div className="space-y-4">
-      <p>{errorUploading}</p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
           <FormField
@@ -274,86 +264,82 @@ function ShopInfo() {
               </FormItem>
             )}
           />
-          <p>Owner Image</p>
-
-          {ownerImage ? (
-            <div className="flex items-center gap-2">
-              <Image
-                src={ownerImage}
-                width={300}
-                height={300}
-                alt="Owner image"
-              />
-              <Button
-                onClick={() => {
-                  deleteImageMutation.mutate({ id: ownerImage });
-                }}
-              >
-                Delete
-              </Button>
-            </div>
-          ) : (
-            <UploadButton
-              endpoint="imageUploader"
-              onUploadBegin={() => {
-                setIsUploading(true);
-              }}
-              onClientUploadComplete={(res) => {
-                // Do something with the response
-                console.log("Files: ", res);
-                setOwnerImage(res[0]?.url ?? "");
-                setIsUploading(false);
-              }}
-              onUploadError={(error: Error) => {
-                // Do something with the error.
-                // alert(`ERROR! ${error.message}`);
-                setIsUploading(false);
-                setErrorUploading(error.message);
-              }}
-            />
-          )}
-          <p>Citizenship Image</p>
-          {citizenshipImage ? (
-            <div className="flex items-center gap-2">
-              <Image
-                src={citizenshipImage}
-                width={300}
-                height={300}
-                alt="Citizenship image"
-              />
-              <Button
-                onClick={() => {
-                  deleteImageMutation.mutate({ id: citizenshipImage });
-                }}
-              >
-                Delete
-              </Button>
-            </div>
-          ) : (
-            <UploadButton
-              endpoint="imageUploader"
-              onClientUploadComplete={(res) => {
-                // Do something with the response
-                console.log("Files: ", res);
-                setCitizenshipImage(res[0]?.url ?? "");
-                setIsUploading(false);
-              }}
-              onUploadBegin={() => {
-                setIsUploading(true);
-              }}
-              onUploadError={(error: Error) => {
-                // Do something with the error.
-                // alert(`ERROR! ${error.message}`);
-                setIsUploading(false);
-                setErrorUploading(error.message);
-              }}
-            />
-          )}
-          <Button type="submit" className="w-full" disabled={isUploading}>
-            Submit
-          </Button>
         </form>
       </Form>
+      <p>Owner Image</p>
+      {ownerImage ? (
+        <div className="flex items-center gap-2">
+          <Image
+            src={ownerImage.appUrl}
+            width={300}
+            height={300}
+            alt="Owner image"
+          />
+          <Button
+            onClick={async () => {
+              const response = await deleteFiles(ownerImage.key);
+              if (response?.success) {
+                setOwnerImage(null);
+              }
+            }}
+          >
+            Delete
+          </Button>
+        </div>
+      ) : (
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target as HTMLFormElement);
+            const response = await uploadFiles(formData);
+            if (response?.[0]?.data) {
+              setOwnerImage(response[0].data);
+            }
+          }}
+        >
+          <input name="files" type="file" multiple />
+          <button type="submit">Upload</button>
+        </form>
+      )}
+      <p>Citizenship Image</p>
+      {citizenshipImage ? (
+        <div className="flex items-center gap-2">
+          <Image
+            src={citizenshipImage.url ?? ""}
+            width={300}
+            height={300}
+            alt="Citizenship image"
+          />
+          <Button
+            onClick={async () => {
+              const response = await deleteFiles(citizenshipImage.key);
+              console.log(response);
+              if (response?.success) {
+                setCitizenshipImage(null);
+              }
+            }}
+          >
+            Delete
+          </Button>
+        </div>
+      ) : (
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target as HTMLFormElement);
+            const response = await uploadFiles(formData);
+            if (response?.[0]?.data) {
+              setCitizenshipImage(response[0].data);
+            }
+          }}
+        >
+          <input name="files" type="file" multiple />
+          <button type="submit">Upload</button>
+        </form>
+      )}
+      <Button type="submit" className="w-full">
+        Save
+      </Button>
     </div>
   );
 }
