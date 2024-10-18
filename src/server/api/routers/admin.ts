@@ -82,4 +82,14 @@ export const adminRouter = createTRPCRouter({
         },
       });
     }),
+
+  getProductById: adminProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.db.product.findUnique({ where: { id: input.id } });
+    }),
 });
