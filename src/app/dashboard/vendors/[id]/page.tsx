@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import React from "react";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import ViewShopDetail from "../_components/view-shop";
+import ShopApprovalPage from "../_components/view-shop";
 
 interface VendorPageProps {
   params: {
@@ -19,7 +19,7 @@ export default async function VendorPage({ params }: VendorPageProps) {
   if (!shop) return <p>Vendor not found {params.id}</p>;
   return (
     <div>
-      <ViewShopDetail shop={shop} />
+      <ShopApprovalPage shopDetail={shop} />
     </div>
   );
 }
