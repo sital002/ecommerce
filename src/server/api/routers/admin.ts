@@ -1,4 +1,4 @@
-import { ACCOUNT_STATUS, ROLE } from "@prisma/client";
+import { ACCOUNT_STATUS, ROLE, STATUS } from "@prisma/client";
 import { z } from "zod";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 
@@ -60,6 +60,26 @@ export const adminRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return ctx.db.shop.findUnique({
         where: { id: input.id },
+      });
+    }),
+
+  updateShopStatus: adminProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        statusMessage: z.string().optional(),
+        status: z.nativeEnum(STATUS),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.shop.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          status: input.status,
+          statusMessage: input.statusMessage,
+        },
       });
     }),
 });

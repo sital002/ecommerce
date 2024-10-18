@@ -35,7 +35,7 @@ import {
   Eye,
 } from "lucide-react";
 import Image from "next/image";
-import type { RouterOutputs } from "~/trpc/react";
+import { api, type RouterOutputs } from "~/trpc/react";
 
 interface ViewShopDetailProps {
   shopDetail: NonNullable<RouterOutputs["admin"]["getShopById"]>;
@@ -46,8 +46,22 @@ export default function ShopApprovalPage({ shopDetail }: ViewShopDetailProps) {
   const [shop, setShop] = useState(shopDetail);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
+  const utils = api.useUtils();
+  const updateStatusMutation = api.admin.updateShopStatus.useMutation({
+    onSuccess: async () => {
+      await utils.admin.getShopById.refetch();
+    },
+    onError: async () => {
+      await utils.admin.getShopById.refetch();
+    },
+  });
+
   const handleApprove = () => {
     setShop({ ...shop, status: "APPROVED" });
+    updateStatusMutation.mutate({
+      id: shop.id,
+      status: "APPROVED",
+    });
     toast({
       title: "Shop Approved",
       description: `${shop.name} has been successfully approved.`,
@@ -56,6 +70,10 @@ export default function ShopApprovalPage({ shopDetail }: ViewShopDetailProps) {
 
   const handleReject = () => {
     setShop({ ...shop, status: "REJECTED" });
+    updateStatusMutation.mutate({
+      id: shop.id,
+      status: "REJECTED",
+    });
     toast({
       title: "Shop Rejected",
       description: `${shop.name} has been rejected.`,
@@ -72,6 +90,12 @@ export default function ShopApprovalPage({ shopDetail }: ViewShopDetailProps) {
       });
       return;
     }
+    setShop({ ...shop, status: "PENDING" });
+    updateStatusMutation.mutate({
+      id: shop.id,
+      status: "PENDING",
+      statusMessage: editMessage,
+    });
     toast({
       title: "Edit Requested",
       description: `Edit request sent to ${shop.name}.`,

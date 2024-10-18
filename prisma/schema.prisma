@@ -116,6 +116,7 @@ model Shop {
     citizenShipImage String
     ownerImage       String
     logo             String
+    statusMessage    String?
     user             User      @relation(fields: [userId], references: [id])
     userId           String    @unique
     products         Product[]
