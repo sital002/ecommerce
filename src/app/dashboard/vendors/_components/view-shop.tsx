@@ -61,6 +61,7 @@ export default function ShopApprovalPage({ shopDetail }: ViewShopDetailProps) {
     updateStatusMutation.mutate({
       id: shop.id,
       status: "APPROVED",
+      statusMessage: "",
     });
     toast({
       title: "Shop Approved",
@@ -73,6 +74,7 @@ export default function ShopApprovalPage({ shopDetail }: ViewShopDetailProps) {
     updateStatusMutation.mutate({
       id: shop.id,
       status: "REJECTED",
+      statusMessage: "",
     });
     toast({
       title: "Shop Rejected",
