@@ -28,7 +28,12 @@ export async function VerifyShopAlert() {
       <AlertCircle className="h-4 w-4" />
       <AlertTitle>Verify Shop</AlertTitle>
       <AlertDescription>
-        Please verify your shop to start selling. Check your{" "}
+        {user.shop?.statusMessage ? (
+          <span>{user.shop.statusMessage}</span>
+        ) : (
+          <span>Please verify your shop to start selling. </span>
+        )}
+        Check your{" "}
         <Link href={"/dashboard/profile"} className="underline">
           profile
         </Link>{" "}
