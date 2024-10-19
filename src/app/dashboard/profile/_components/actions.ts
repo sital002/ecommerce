@@ -7,6 +7,7 @@ export async function uploadFiles(formData: FormData) {
   const files = formData
     .getAll("files")
     .filter((entry): entry is File => entry instanceof File);
+  console.log(files);
   const response = await utApi.uploadFiles(files);
   return response;
 }

@@ -90,6 +90,30 @@ export const adminRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      return ctx.db.product.findUnique({ where: { id: input.id } });
+      return ctx.db.product.findUnique({
+        where: { id: input.id },
+        include: { createdBy: true },
+      });
+    }),
+
+  updateProductStatus: adminProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        status: z.nativeEnum(STATUS),
+        statusMessage: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.product.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          status: input.status,
+          statusMessage: input.statusMessage,
+        },
+        include: { createdBy: true },
+      });
     }),
 });

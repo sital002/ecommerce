@@ -76,17 +76,17 @@ export const userRouter = createTRPCRouter({
           message: "Failed to hash password",
         });
 
-      const emailSent = await sendEmail({
-        html: verifyEmailHtml,
-        subject: "Verify your email",
-        to: input.email,
-      });
-      if (!emailSent) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to send verification email",
-        });
-      }
+      // const emailSent = await sendEmail({
+      //   html: verifyEmailHtml,
+      //   subject: "Verify your email",
+      //   to: input.email,
+      // });
+      // if (!emailSent) {
+      //   throw new TRPCError({
+      //     code: "INTERNAL_SERVER_ERROR",
+      //     message: "Failed to send verification email",
+      //   });
+      // }
       return ctx.db.user.create({
         data: {
           name: input.name,

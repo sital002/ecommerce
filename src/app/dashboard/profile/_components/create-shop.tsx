@@ -18,6 +18,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Image from "next/image";
 import type { UploadedFileData } from "uploadthing/types";
+import { uploadFiles } from "./actions";
 
 const shopSchema = z.object({
   name: z.string(),
@@ -59,9 +60,13 @@ export function CreateShopForm() {
   });
 
   form.watch();
-  const onSubmit = (data: z.infer<typeof shopSchema>) => {
-    console.log(data);
-    if (!ownerImage || !citizenshipImage) return;
+  const onSubmit = async (data: z.infer<typeof shopSchema>) => {
+    if (!previewImage?.citizenShipImage || !previewImage?.ownerImage) return;
+    const formData = new FormData();
+    formData.append("files", previewImage.citizenShipImage);
+    formData.append("files", previewImage.ownerImage);
+    const uploadedImages = await uploadFiles(formData);
+    console.log(uploadedImages);
     shopMutation.mutate({
       address: data.address,
       banner: data.banner,
@@ -69,9 +74,9 @@ export function CreateShopForm() {
       description: data.description,
       logo: data.logo,
       name: data.name,
-      ownerImage: ownerImage.appUrl,
+      ownerImage: ownerImage?.appUrl ?? "",
       phone: data.phone,
-      citizenshipImage: citizenshipImage.appUrl,
+      citizenshipImage: citizenshipImage?.appUrl ?? "",
     });
   };
   return (

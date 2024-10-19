@@ -33,21 +33,31 @@ enum STATUS {
 }
 
 model Product {
-    id          String   @id @default(cuid())
-    name        String
-    createdAt   DateTime @default(now())
-    description String
-    price       Float
-    url         String
-    updatedAt   DateTime @updatedAt
-    reviews     Review[]
-    createdBy   User     @relation(fields: [createdById], references: [id])
-    createdById String
-    status      STATUS   @default(PENDING)
-    shop        Shop     @relation(fields: [shopId], references: [id])
-    shopId      String
+    id            String    @id @default(cuid())
+    name          String
+    createdAt     DateTime  @default(now())
+    description   String
+    price         Float
+    url           String
+    updatedAt     DateTime  @updatedAt
+    reviews       Review[]
+    stock         Int
+    statusMessage String?
+    createdBy     User      @relation(fields: [createdById], references: [id])
+    createdById   String
+    status        STATUS    @default(PENDING)
+    shop          Shop      @relation(fields: [shopId], references: [id])
+    shopId        String
+    category      Category? @relation(fields: [categoryId], references: [id])
+    categoryId    String?
 
     @@index([name])
+}
+
+model Category {
+    id       String    @id @default(cuid())
+    name     String
+    products Product[]
 }
 
 model Review {

@@ -19,6 +19,7 @@ export const productRouter = createTRPCRouter({
         description: z.string().min(10).max(500),
         price: z.number().min(0).max(1000000),
         image: z.string().url(),
+        stock: z.number().default(0),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -36,6 +37,7 @@ export const productRouter = createTRPCRouter({
       }
       return db.product.create({
         data: {
+          stock: input.stock,
           name: input.name,
           price: input.price,
           description: input.description,

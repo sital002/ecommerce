@@ -3,6 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { inferProcedureOutput } from "@trpc/server";
 import Image from "next/image";
+import Link from "next/link";
 import type { AppRouter } from "~/server/api/root";
 
 type Product = inferProcedureOutput<AppRouter["product"]["get"]>[number];
@@ -57,6 +58,14 @@ export const columns: ColumnDef<Product>[] = [
     header: "Created At",
     cell: ({ row }) => {
       return new Date(row.original.createdAt).toLocaleDateString();
+    },
+  },
+  {
+    accessorKey: "actions",
+    header: "Actions",
+    enableHiding: false,
+    cell: ({ row }) => {
+      return <Link href={`/dashboard/products/${row.original.id}`}>View</Link>;
     },
   },
 ];

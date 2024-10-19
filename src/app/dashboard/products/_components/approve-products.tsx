@@ -23,19 +23,10 @@ import {
 } from "~/components/ui/dialog";
 import { Textarea } from "~/components/ui/textarea";
 import { toast } from "~/hooks/use-toast";
-import {
-  CheckCircle,
-  XCircle,
-  Edit,
-  DollarSign,
-  Package,
-  Star,
-  Calendar,
-} from "lucide-react";
+import { CheckCircle, XCircle, Edit, DollarSign, Calendar } from "lucide-react";
 import Image from "next/image";
-import type { RouterOutputs } from "~/trpc/react";
-
-// Mock data for the product
+import { api, type RouterOutputs } from "~/trpc/react";
+import Link from "next/link";
 
 interface ProductApprovePageProps {
   productData: NonNullable<RouterOutputs["admin"]["getProductById"]>;
@@ -46,9 +37,24 @@ export default function ProductApprovalPage({
   const [product, setProduct] = useState(productData);
   const [editMessage, setEditMessage] = useState("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const utils = api.useUtils();
+  const productMutation = api.admin.updateProductStatus.useMutation({
+    onSuccess: async (data) => {
+      setProduct(data);
+      await utils.admin.getProductById.refetch();
+    },
+    onError: async () => {
+      await utils.admin.getProductById.refetch();
+    },
+  });
 
   const handleApprove = () => {
     setProduct({ ...product, status: "APPROVED" });
+    productMutation.mutate({
+      id: product.id,
+      status: "APPROVED",
+      statusMessage: "",
+    });
     toast({
       title: "Product Approved",
       description: `${product.name} has been successfully approved.`,
@@ -57,6 +63,11 @@ export default function ProductApprovalPage({
 
   const handleReject = () => {
     setProduct({ ...product, status: "REJECTED" });
+    productMutation.mutate({
+      id: product.id,
+      status: "REJECTED",
+      statusMessage: "",
+    });
     toast({
       title: "Product Rejected",
       description: `${product.name} has been rejected.`,
@@ -73,6 +84,13 @@ export default function ProductApprovalPage({
       });
       return;
     }
+    productMutation.mutate({
+      id: product.id,
+      status: "PENDING",
+      statusMessage: editMessage,
+    });
+    setProduct({ ...product, status: "PENDING" });
+
     toast({
       title: "Edit Requested",
       description: `Edit request sent for ${product.name}.`,
@@ -103,10 +121,13 @@ export default function ProductApprovalPage({
                   ? "destructive"
                   : "secondary"
             }
-            className="mt-2"
+            className="mt-2 w-fit"
           >
             {product.status}
           </Badge>
+          {product.statusMessage && (
+            <p>Changes Requested: {product.statusMessage}</p>
+          )}
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -132,7 +153,15 @@ export default function ProductApprovalPage({
                 <span>
                   Added on {new Date(product.createdAt).toLocaleDateString()}
                 </span>
+                <span>by</span>
+                <Link
+                  className="underline"
+                  href={`/dashboard/profile/${product.createdById}`}
+                >
+                  {product.createdBy.name}
+                </Link>
               </div>
+              <p>{product.description}</p>
             </div>
             <div className="space-y-4">
               <div>

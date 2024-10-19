@@ -41,6 +41,9 @@ const formSchema = z.object({
       message: "Description can only contain letters and spaces",
     }),
   image: z.string().url(),
+  stock: z.string().refine((val) => parseInt(val) >= 0, {
+    message: "Stock must be a valid number",
+  }),
 });
 
 type FormOptions = {
@@ -78,11 +81,18 @@ const formOptions: FormOptions[] = [
     type: "number",
   },
   {
+    label: "Stock",
+    name: "stock",
+    placeholder: "Enter the stock",
+    type: "number",
+  },
+  {
     label: "Product description",
     name: "description",
     placeholder: "Enter the description",
     type: "text",
   },
+
   {
     label: "Image",
     name: "image",
@@ -92,10 +102,11 @@ const formOptions: FormOptions[] = [
 ];
 
 const initialState: Product = {
-  name: "",
+  name: "test product",
   price: 0,
-  description: "",
-  image: "",
+  stock: "0",
+  description: "This is a description",
+  image: "https://github.com/sital002.png",
 };
 export default function ProductForm(props: ProductFormProps) {
   const router = useRouter();
@@ -113,7 +124,13 @@ export default function ProductForm(props: ProductFormProps) {
 
   function onSubmit(data: Product) {
     if (!props.update) {
-      return createProductMutation.mutate(data);
+      return createProductMutation.mutate({
+        description: data.description,
+        image: data.image,
+        name: data.name,
+        price: data.price,
+        stock: parseInt(data.stock),
+      });
     }
   }
 
