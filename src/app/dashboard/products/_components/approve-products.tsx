@@ -27,8 +27,18 @@ import {
   Calendar,
 } from "lucide-react";
 import Image from "next/image";
-import type { RouterOutputs } from "~/trpc/react";
+import { api, type RouterOutputs } from "~/trpc/react";
 import { useSession } from "next-auth/react";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
 
 type Product = NonNullable<RouterOutputs["product"]["getById"]>;
 
@@ -41,6 +51,20 @@ export default function ProductEditApprovalPage({
   const [product, setProduct] = useState<Product>(productData);
   const [isEditing, setIsEditing] = useState(false);
   const [editedProduct, setEditedProduct] = useState<Product>(productData);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editMessage, setEditMessage] = useState("");
+
+  const utils = api.useUtils();
+  const updateProductMutation = api.admin.updateProductStatus.useMutation({
+    onSuccess: async (data) => {
+      console.log(data);
+      await utils.product.getById.refetch();
+    },
+    onError: async (err) => {
+      console.log(err);
+      await utils.product.getById.refetch();
+    },
+  });
 
   const session = useSession();
 
@@ -52,6 +76,7 @@ export default function ProductEditApprovalPage({
   const handleSave = () => {
     setProduct(editedProduct);
     setIsEditing(false);
+
     toast({
       title: "Product Updated",
       description: "The product information has been successfully updated.",
@@ -63,6 +88,28 @@ export default function ProductEditApprovalPage({
     setEditedProduct(product);
   };
 
+  const handleRequestEdit = () => {
+    if (editMessage.trim() === "") {
+      toast({
+        title: "Error",
+        description: "Please provide a message for the edit request.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setProduct({ ...product, status: "PENDING" });
+    updateProductMutation.mutate({
+      id: product.id,
+      status: "PENDING",
+      statusMessage: editMessage,
+    });
+    toast({
+      title: "Edit Requested",
+      description: `Edit request sent for ${product.name}.`,
+    });
+    setEditMessage("");
+    setIsEditDialogOpen(false);
+  };
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -75,6 +122,11 @@ export default function ProductEditApprovalPage({
 
   const handleApprove = () => {
     setProduct({ ...product, status: "APPROVED" });
+    updateProductMutation.mutate({
+      id: product.id,
+      status: "APPROVED",
+      statusMessage: "",
+    });
     toast({
       title: "Product Approved",
       description: `${product.name} has been successfully approved.`,
@@ -83,6 +135,11 @@ export default function ProductEditApprovalPage({
 
   const handleReject = () => {
     setProduct({ ...product, status: "REJECTED" });
+    updateProductMutation.mutate({
+      id: product.id,
+      status: "REJECTED",
+      statusMessage: "",
+    });
     toast({
       title: "Product Rejected",
       description: `${product.name} has been rejected.`,
@@ -94,6 +151,10 @@ export default function ProductEditApprovalPage({
     <div className="container mx-auto p-4">
       <Card className="mx-auto w-full max-w-4xl">
         <CardHeader>
+          <p className="text-destructive">
+            {updateProductMutation.error?.message}
+          </p>
+
           <div className="flex items-center space-x-4">
             <Avatar className="h-20 w-20">
               <AvatarImage src={product.url} alt={product.name} />
@@ -245,6 +306,38 @@ export default function ProductEditApprovalPage({
               >
                 <XCircle className="mr-2 h-4 w-4" /> Reject Product
               </Button>
+              <Dialog
+                open={isEditDialogOpen}
+                onOpenChange={setIsEditDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Edit className="mr-2 h-4 w-4" /> Request Edit
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Request Edit for Product</DialogTitle>
+                    <DialogDescription>
+                      Provide details for the requested changes to the product.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <Textarea
+                      id="edit-message"
+                      value={editMessage}
+                      onChange={(e) => setEditMessage(e.target.value)}
+                      placeholder="Enter your edit request message here..."
+                      className="col-span-3"
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" onClick={handleRequestEdit}>
+                      Send Request
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </>
           )}
         </CardFooter>

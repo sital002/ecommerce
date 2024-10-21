@@ -56,6 +56,57 @@ export const productRouter = createTRPCRouter({
       });
     }),
 
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string().min(3).max(255),
+        description: z.string().min(10).max(500),
+        price: z.number().min(0).max(1000000),
+        image: z.string().url(),
+        stock: z.number().default(0),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const user = ctx.session.user;
+      if (user.role !== "VENDOR")
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to update products",
+        });
+      if (!user.shop) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You need to create a shop first",
+        });
+      }
+      const product = await db.product.findUnique({
+        where: { id: input.id },
+      });
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+      }
+      if (product.createdById !== user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to update this product",
+        });
+      }
+      return db.product.update({
+        where: { id: input.id },
+        data: {
+          stock: input.stock,
+          name: input.name,
+          price: input.price,
+          description: input.description,
+          url: input.image,
+        },
+      });
+    }),
+
   getById: protectedProcedure
     .input(
       z.object({
