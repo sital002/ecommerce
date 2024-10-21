@@ -11,8 +11,12 @@ interface ProductPageProps {
 }
 export default async function page({ params }: ProductPageProps) {
   const session = await getServerAuthSession();
-  if (!session || session.user.role !== "ADMIN") redirect("/signin");
-  const product = await api.admin.getProductById({ id: params.id });
+  if (
+    !session ||
+    (session.user.role !== "ADMIN" && session.user.role !== "VENDOR")
+  )
+    redirect("/signin");
+  const product = await api.product.getById({ id: params.id });
   if (!product) return <p>Product not found</p>;
   return (
     <div>

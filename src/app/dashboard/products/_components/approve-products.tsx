@@ -27,9 +27,10 @@ import { CheckCircle, XCircle, Edit, DollarSign, Calendar } from "lucide-react";
 import Image from "next/image";
 import { api, type RouterOutputs } from "~/trpc/react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 interface ProductApprovePageProps {
-  productData: NonNullable<RouterOutputs["admin"]["getProductById"]>;
+  productData: NonNullable<RouterOutputs["product"]["getById"]>;
 }
 export default function ProductApprovalPage({
   productData,
@@ -37,6 +38,7 @@ export default function ProductApprovalPage({
   const [product, setProduct] = useState(productData);
   const [editMessage, setEditMessage] = useState("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const session = useSession();
   const utils = api.useUtils();
   const productMutation = api.admin.updateProductStatus.useMutation({
     onSuccess: async (data) => {
@@ -179,50 +181,52 @@ export default function ProductApprovalPage({
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button
-            onClick={handleApprove}
-            disabled={product.status === "APPROVED"}
-          >
-            <CheckCircle className="mr-2 h-4 w-4" /> Approve Product
-          </Button>
-          <Button
-            onClick={handleReject}
-            variant="destructive"
-            disabled={product.status === "REJECTED"}
-          >
-            <XCircle className="mr-2 h-4 w-4" /> Reject Product
-          </Button>
-          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Edit className="mr-2 h-4 w-4" /> Request Edit
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Request Edit for Product</DialogTitle>
-                <DialogDescription>
-                  Provide details for the requested changes to the product.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <Textarea
-                  id="edit-message"
-                  value={editMessage}
-                  onChange={(e) => setEditMessage(e.target.value)}
-                  placeholder="Enter your edit request message here..."
-                  className="col-span-3"
-                />
-              </div>
-              <DialogFooter>
-                <Button type="submit" onClick={handleRequestEdit}>
-                  Send Request
+        {session.data?.user.role === "ADMIN" && (
+          <CardFooter className="flex justify-between">
+            <Button
+              onClick={handleApprove}
+              disabled={product.status === "APPROVED"}
+            >
+              <CheckCircle className="mr-2 h-4 w-4" /> Approve Product
+            </Button>
+            <Button
+              onClick={handleReject}
+              variant="destructive"
+              disabled={product.status === "REJECTED"}
+            >
+              <XCircle className="mr-2 h-4 w-4" /> Reject Product
+            </Button>
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Edit className="mr-2 h-4 w-4" /> Request Edit
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </CardFooter>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Request Edit for Product</DialogTitle>
+                  <DialogDescription>
+                    Provide details for the requested changes to the product.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <Textarea
+                    id="edit-message"
+                    value={editMessage}
+                    onChange={(e) => setEditMessage(e.target.value)}
+                    placeholder="Enter your edit request message here..."
+                    className="col-span-3"
+                  />
+                </div>
+                <DialogFooter>
+                  <Button type="submit" onClick={handleRequestEdit}>
+                    Send Request
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </CardFooter>
+        )}
       </Card>
     </div>
   );
