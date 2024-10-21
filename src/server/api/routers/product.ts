@@ -75,7 +75,7 @@ export const productRouter = createTRPCRouter({
 
       const product = await db.product.findUnique({
         where: { id: input.id },
-        include: { createdBy: true },
+        include: { createdBy: true, category: true },
       });
 
       if (!product) {

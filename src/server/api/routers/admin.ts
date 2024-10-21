@@ -113,7 +113,7 @@ export const adminRouter = createTRPCRouter({
           status: input.status,
           statusMessage: input.statusMessage,
         },
-        include: { createdBy: true },
+        include: { createdBy: true, category: true },
       });
     }),
 });

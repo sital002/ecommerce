@@ -12,51 +12,69 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/ui/dialog";
+
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { toast } from "~/hooks/use-toast";
-import { CheckCircle, XCircle, Edit, DollarSign, Calendar } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Edit,
+  DollarSign,
+  Package,
+  Star,
+  Calendar,
+} from "lucide-react";
 import Image from "next/image";
-import { api, type RouterOutputs } from "~/trpc/react";
-import Link from "next/link";
+import type { RouterOutputs } from "~/trpc/react";
 import { useSession } from "next-auth/react";
 
-interface ProductApprovePageProps {
-  productData: NonNullable<RouterOutputs["product"]["getById"]>;
+type Product = NonNullable<RouterOutputs["product"]["getById"]>;
+
+interface ProductEditApprovalPageProps {
+  productData: Product;
 }
-export default function ProductApprovalPage({
+export default function ProductEditApprovalPage({
   productData,
-}: ProductApprovePageProps) {
-  const [product, setProduct] = useState(productData);
-  const [editMessage, setEditMessage] = useState("");
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+}: ProductEditApprovalPageProps) {
+  const [product, setProduct] = useState<Product>(productData);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedProduct, setEditedProduct] = useState<Product>(productData);
+
   const session = useSession();
-  const utils = api.useUtils();
-  const productMutation = api.admin.updateProductStatus.useMutation({
-    onSuccess: async (data) => {
-      setProduct(data);
-      await utils.admin.getProductById.refetch();
-    },
-    onError: async () => {
-      await utils.admin.getProductById.refetch();
-    },
-  });
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditedProduct(product);
+  };
+
+  const handleSave = () => {
+    setProduct(editedProduct);
+    setIsEditing(false);
+    toast({
+      title: "Product Updated",
+      description: "The product information has been successfully updated.",
+    });
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditedProduct(product);
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
+    setEditedProduct((prev) => ({
+      ...prev,
+      [name]: name === "price" || name === "stock" ? Number(value) : value,
+    }));
+  };
 
   const handleApprove = () => {
     setProduct({ ...product, status: "APPROVED" });
-    productMutation.mutate({
-      id: product.id,
-      status: "APPROVED",
-      statusMessage: "",
-    });
     toast({
       title: "Product Approved",
       description: `${product.name} has been successfully approved.`,
@@ -65,40 +83,11 @@ export default function ProductApprovalPage({
 
   const handleReject = () => {
     setProduct({ ...product, status: "REJECTED" });
-    productMutation.mutate({
-      id: product.id,
-      status: "REJECTED",
-      statusMessage: "",
-    });
     toast({
       title: "Product Rejected",
       description: `${product.name} has been rejected.`,
       variant: "destructive",
     });
-  };
-
-  const handleRequestEdit = () => {
-    if (editMessage.trim() === "") {
-      toast({
-        title: "Error",
-        description: "Please provide a message for the edit request.",
-        variant: "destructive",
-      });
-      return;
-    }
-    productMutation.mutate({
-      id: product.id,
-      status: "PENDING",
-      statusMessage: editMessage,
-    });
-    setProduct({ ...product, status: "PENDING" });
-
-    toast({
-      title: "Edit Requested",
-      description: `Edit request sent for ${product.name}.`,
-    });
-    setEditMessage("");
-    setIsEditDialogOpen(false);
   };
 
   return (
@@ -127,106 +116,138 @@ export default function ProductApprovalPage({
           >
             {product.status}
           </Badge>
-          {product.statusMessage && (
-            <p>Changes Requested: {product.statusMessage}</p>
-          )}
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <DollarSign className="text-gray-500" />
-                <span>Price: ${product.price.toFixed(2)}</span>
-              </div>
-              {/* <div className="flex items-center space-x-2">
-                <Package className="text-gray-500" />
-                <span>Category: {product.category}</span>
-              </div> */}
-              {/* <div className="flex items-center space-x-2">
-                <Star className="text-gray-500" />
-                <span>Rating: {product.rating} / 5</span>
-              </div> */}
-              {/* <div className="flex items-center space-x-2">
-                <Package className="text-gray-500" />
-                <span>Stock: {product.stock} units</span>
-              </div> */}
-              <div className="flex items-center space-x-2">
-                <Calendar className="text-gray-500" />
-                <span>
-                  Added on {new Date(product.createdAt).toLocaleDateString()}
-                </span>
-                <span>by</span>
-                <Link
-                  className="underline"
-                  href={`/dashboard/profile/${product.createdById}`}
-                >
-                  {product.createdBy.name}
-                </Link>
-              </div>
-              <p>{product.description}</p>
-            </div>
+          {isEditing ? (
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-semibold">Product Image</h3>
-                <div className="relative mt-2 h-60 w-full">
-                  <Image
-                    src={product.url}
-                    alt={product.name}
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-md"
+                <Label htmlFor="name">Product Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={editedProduct.name}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={editedProduct.description}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="price">Price</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    type="number"
+                    value={editedProduct.price}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="stock">Stock</Label>
+                  <Input
+                    id="stock"
+                    name="stock"
+                    type="number"
+                    value={editedProduct.stock}
+                    onChange={handleInputChange}
                   />
                 </div>
               </div>
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Input
+                  id="category"
+                  name="category"
+                  value={"Category"}
+                  onChange={handleInputChange}
+                />
+              </div>
             </div>
-          </div>
-        </CardContent>
-        {session.data?.user.role === "ADMIN" && (
-          <CardFooter className="flex justify-between">
-            <Button
-              onClick={handleApprove}
-              disabled={product.status === "APPROVED"}
-            >
-              <CheckCircle className="mr-2 h-4 w-4" /> Approve Product
-            </Button>
-            <Button
-              onClick={handleReject}
-              variant="destructive"
-              disabled={product.status === "REJECTED"}
-            >
-              <XCircle className="mr-2 h-4 w-4" /> Reject Product
-            </Button>
-            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Edit className="mr-2 h-4 w-4" /> Request Edit
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Request Edit for Product</DialogTitle>
-                  <DialogDescription>
-                    Provide details for the requested changes to the product.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <Textarea
-                    id="edit-message"
-                    value={editMessage}
-                    onChange={(e) => setEditMessage(e.target.value)}
-                    placeholder="Enter your edit request message here..."
-                    className="col-span-3"
-                  />
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <DollarSign className="text-gray-500" />
+                  <span>Price: ${product.price.toFixed(2)}</span>
                 </div>
-                <DialogFooter>
-                  <Button type="submit" onClick={handleRequestEdit}>
-                    Send Request
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </CardFooter>
-        )}
+
+                {product.category && (
+                  <div className="flex items-center space-x-2">
+                    <Package className="text-gray-500" />
+                    <span>Category: {product.category?.name}</span>
+                  </div>
+                )}
+                <div className="flex items-center space-x-2">
+                  <Star className="text-gray-500" />
+                  <span>Rating: {product.price} / 5</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Package className="text-gray-500" />
+                  <span>Stock: {product.stock} units</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="text-gray-500" />
+                  <span>
+                    Added on {new Date(product.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold">Product Image</h3>
+                  <div className="relative mt-2 h-60 w-full">
+                    <Image
+                      src={product.url}
+                      alt={product.name}
+                      layout="fill"
+                      objectFit="cover"
+                      className="rounded-md"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          {session.data?.user.role === "VENDOR" &&
+            (isEditing ? (
+              <>
+                <Button onClick={handleSave}>Save Changes</Button>
+                <Button variant="outline" onClick={handleCancel}>
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button onClick={handleEdit}>
+                <Edit className="mr-2 h-4 w-4" /> Edit Product
+              </Button>
+            ))}
+          {session.data?.user.role === "ADMIN" && (
+            <>
+              <Button
+                onClick={handleApprove}
+                disabled={product.status === "APPROVED"}
+              >
+                <CheckCircle className="mr-2 h-4 w-4" /> Approve Product
+              </Button>
+              <Button
+                onClick={handleReject}
+                variant="destructive"
+                disabled={product.status === "REJECTED"}
+              >
+                <XCircle className="mr-2 h-4 w-4" /> Reject Product
+              </Button>
+            </>
+          )}
+        </CardFooter>
       </Card>
     </div>
   );
