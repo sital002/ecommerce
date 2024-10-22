@@ -153,10 +153,10 @@ export default function ProfileDashboard({ user }: ProfilePageProps) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {!user.shop?.statusMessage && user.shop ? (
+                  {user.shop && user.shop.status === "PENDING" ? (
                     <ShopInfoPage shop={user.shop} />
                   ) : (
-                    <CreateShopForm />
+                    <CreateShopForm shop={user.shop} />
                   )}
                 </CardContent>
               </Card>

@@ -29,7 +29,7 @@ export async function VerifyShopAlert() {
       <AlertTitle>Verify Shop</AlertTitle>
       <AlertDescription>
         {user.shop?.statusMessage ? (
-          <span>{user.shop.statusMessage}</span>
+          <span>{user.shop.statusMessage} </span>
         ) : (
           <span>Please verify your shop to start selling. </span>
         )}

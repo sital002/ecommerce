@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 
-import { api } from "~/trpc/react";
+import { api, type RouterOutputs } from "~/trpc/react";
 import {
   Form,
   FormControl,
@@ -19,6 +19,7 @@ import { z } from "zod";
 import Image from "next/image";
 import type { UploadedFileData } from "uploadthing/types";
 import { uploadFiles } from "./actions";
+import { useRouter } from "next/navigation";
 
 const shopSchema = z.object({
   name: z.string(),
@@ -29,7 +30,11 @@ const shopSchema = z.object({
   phone: z.string(),
   categories: z.array(z.string()),
 });
-export function CreateShopForm() {
+
+interface CreateShopFormProps {
+  shop: RouterOutputs["shop"]["create"] | null;
+}
+export function CreateShopForm({ shop }: CreateShopFormProps) {
   const [ownerImage, setOwnerImage] = useState<UploadedFileData | null>(null);
   const [citizenshipImage, setCitizenshipImage] =
     useState<UploadedFileData | null>(null);
@@ -38,51 +43,89 @@ export function CreateShopForm() {
     ownerImage: string;
   } | null>(null);
 
+  const initialState = {
+    name: "",
+    description: "",
+    address: "",
+    logo: "",
+    banner: "",
+    phone: "",
+    categories: [],
+  };
   const form = useForm<z.infer<typeof shopSchema>>({
     resolver: zodResolver(shopSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      address: "",
-      logo: "",
-      banner: "",
-      phone: "",
-      categories: [],
-    },
+    defaultValues: shop
+      ? {
+          address: shop.address,
+          description: shop.description,
+          logo: shop.logo,
+          banner: "",
+          categories: [],
+          name: shop.name,
+          phone: shop.phone,
+        }
+      : initialState,
   });
-  const shopMutation = api.shop.create.useMutation({
-    onSuccess: (data) => {
+  const router = useRouter();
+  const utils = api.useUtils();
+  const { mutate: createShop, error } = api.shop.create.useMutation({
+    onSuccess: async (data) => {
       console.log(data);
+      router.refresh();
+      await utils.user.get.refetch();
     },
     onError: (error) => {
       console.error(error);
     },
   });
 
+  const { mutate: updateShop, error: updateError } =
+    api.shop.update.useMutation({
+      onSuccess: async () => {
+        console.log("data");
+        await utils.user.get.refetch();
+        router.refresh();
+      },
+      onError: (error) => {
+        console.error(error);
+      },
+    });
+
   form.watch();
   const onSubmit = async (data: z.infer<typeof shopSchema>) => {
-    if (!previewImage?.citizenShipImage || !previewImage?.ownerImage) return;
-    const formData = new FormData();
-    formData.append("files", previewImage.citizenShipImage);
-    formData.append("files", previewImage.ownerImage);
-    const uploadedImages = await uploadFiles(formData);
-    console.log(uploadedImages);
-    shopMutation.mutate({
+    if (shop) {
+      updateShop({
+        address: data.address,
+        banner: data.banner,
+        categories: data.categories,
+        description: data.description,
+        logo: data.logo,
+        name: data.name,
+        ownerImage: ownerImage?.appUrl ?? shop.ownerImage,
+        phone: data.phone,
+        citizenshipImage: citizenshipImage?.appUrl ?? shop.citizenShipImage,
+      });
+      return;
+    }
+    if (!ownerImage || !citizenshipImage) return;
+
+    createShop({
       address: data.address,
       banner: data.banner,
       categories: data.categories,
       description: data.description,
       logo: data.logo,
       name: data.name,
-      ownerImage: ownerImage?.appUrl ?? "",
+      ownerImage: ownerImage?.appUrl,
       phone: data.phone,
-      citizenshipImage: citizenshipImage?.appUrl ?? "",
+      citizenshipImage: citizenshipImage?.appUrl,
     });
   };
   return (
     <div className="space-y-4">
-      {shopMutation.error && (
-        <div className="text-destructive">{shopMutation.error.message}</div>
+      {error && <div className="text-destructive">{error.message}</div>}
+      {updateError && (
+        <div className="text-destructive">{updateError.message}</div>
       )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
@@ -128,10 +171,10 @@ export function CreateShopForm() {
           />
 
           <p>Owner Image</p>
-          {previewImage?.ownerImage ? (
+          {previewImage?.ownerImage || shop?.ownerImage ? (
             <div className="flex items-center gap-2">
               <Image
-                src={previewImage.ownerImage}
+                src={previewImage?.ownerImage ?? shop?.ownerImage ?? ""}
                 width={300}
                 height={300}
                 alt="Owner image"
@@ -152,10 +195,15 @@ export function CreateShopForm() {
               name="files"
               type="file"
               accept="image/*"
-              onChange={(e) => {
+              onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
                 const reader = new FileReader();
+                const formData = new FormData();
+                formData.append("files", file);
+                const uploadedImages = await uploadFiles(formData);
+                if (!uploadedImages[0]?.data) return;
+                setOwnerImage(uploadedImages[0].data);
                 reader.onload = (e) => {
                   const target = e.currentTarget as FileReader;
                   setPreviewImage((prev) => ({
@@ -168,10 +216,12 @@ export function CreateShopForm() {
             />
           )}
           <p>Citizenship Image</p>
-          {previewImage?.citizenShipImage ? (
+          {previewImage?.citizenShipImage || shop?.citizenShipImage ? (
             <div className="flex items-center gap-2">
               <Image
-                src={previewImage.citizenShipImage}
+                src={
+                  previewImage?.citizenShipImage ?? shop?.citizenShipImage ?? ""
+                }
                 width={300}
                 height={300}
                 alt="Citizenship image"
@@ -192,9 +242,14 @@ export function CreateShopForm() {
               name="files"
               type="file"
               accept="image/*"
-              onChange={(e) => {
+              onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
+                const formData = new FormData();
+                formData.append("files", file);
+                const uploadedImages = await uploadFiles(formData);
+                if (!uploadedImages[0]?.data) return;
+                setCitizenshipImage(uploadedImages[0].data);
                 const reader = new FileReader();
                 reader.onload = (e) => {
                   const target = e.currentTarget as FileReader;
