@@ -140,45 +140,47 @@ const testURL =
 
 function ProductCard({ product }: { product: Product }) {
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-0">
-        <Image
-          src={product.url || testURL}
-          width={300}
-          height={300}
-          alt={product.name}
-          className="h-48 w-full object-cover"
-        />
-        <div className="p-4">
-          <h3 className="mb-2 line-clamp-2 h-10 text-sm font-medium">
-            {product.name}
-          </h3>
-          <div className="mb-1 flex items-baseline">
-            <span className="mr-2 font-bold text-primary">
-              ${product.price.toFixed(2)}
+    <Link href={`/products/${product.id}`}>
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
+          <Image
+            src={product.url || testURL}
+            width={300}
+            height={300}
+            alt={product.name}
+            className="h-48 w-full object-cover"
+          />
+          <div className="p-4">
+            <h3 className="mb-2 line-clamp-2 h-10 text-sm font-medium">
+              {product.name}
+            </h3>
+            <div className="mb-1 flex items-baseline">
+              <span className="mr-2 font-bold text-primary">
+                ${product.price.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="p-4 pt-0">
+          <div className="flex items-center">
+            <div className="mr-1 flex">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`h-4 w-4 ${
+                    star
+                      ? "fill-current text-yellow-400"
+                      : "text-muted-foreground"
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-sm text-muted-foreground">
+              ({Math.round(Math.random() * 100)} reviews)
             </span>
           </div>
-        </div>
-      </CardContent>
-      <CardFooter className="p-4 pt-0">
-        <div className="flex items-center">
-          <div className="mr-1 flex">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star
-                key={star}
-                className={`h-4 w-4 ${
-                  star
-                    ? "fill-current text-yellow-400"
-                    : "text-muted-foreground"
-                }`}
-              />
-            ))}
-          </div>
-          <span className="text-sm text-muted-foreground">
-            ({Math.round(Math.random() * 100)} reviews)
-          </span>
-        </div>
-      </CardFooter>
-    </Card>
+        </CardFooter>
+      </Card>
+    </Link>
   );
 }
