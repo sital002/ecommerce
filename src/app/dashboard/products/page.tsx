@@ -13,7 +13,7 @@ export default async function page() {
     (session.user.role !== "ADMIN" && session.user.role !== "VENDOR")
   )
     redirect("/signin");
-  const products = await api.product.get();
+  const products = await api.product.getAllProducts();
 
   return (
     <div>

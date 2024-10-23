@@ -39,6 +39,7 @@ model Product {
     description   String
     price         Float
     url           String
+    images        Json[]
     updatedAt     DateTime  @updatedAt
     reviews       Review[]
     stock         Int

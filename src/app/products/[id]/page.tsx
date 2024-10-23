@@ -17,9 +17,13 @@ interface ProductDetailPageProps {
   };
 }
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const product = api.product.getById.useQuery({ id: params.id }).data;
+  const { data: product, isLoading } = api.product.getById.useQuery({
+    id: params.id,
+  });
   const [quantity, setQuantity] = useState(1);
+  const [mainImage, setMainImage] = useState(product?.images?.[0]?.url ?? "");
 
+  if (isLoading) return <p>Loading...</p>;
   if (!product) return <p>The Product couldn&apos;t be found </p>;
   const handleAddToCart = () => {
     toast({
@@ -33,22 +37,22 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         <div className="space-y-4">
           <div className="relative aspect-square overflow-hidden rounded-lg">
             <Image
-              src={product.url}
+              src={mainImage}
               alt={product.name}
               layout="fill"
               objectFit="cover"
               className="rounded-lg"
             />
           </div>
-          {/* <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             {product.images.map((img, index) => (
               <div
                 key={index}
                 className="relative aspect-square cursor-pointer overflow-hidden rounded-md"
-                onClick={() => setMainImage(img)}
+                onClick={() => setMainImage(img.url)}
               >
                 <Image
-                  src={img}
+                  src={img.url}
                   alt={`${product.name} - Image ${index + 1}`}
                   layout="fill"
                   objectFit="cover"
@@ -56,7 +60,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                 />
               </div>
             ))}
-          </div> */}
+          </div>
         </div>
 
         <div className="space-y-6">

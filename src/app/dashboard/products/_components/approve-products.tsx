@@ -58,11 +58,11 @@ export default function ProductEditApprovalPage({
   const updateProductMutation = api.admin.updateProductStatus.useMutation({
     onSuccess: async (data) => {
       console.log(data);
-      await utils.product.getById.refetch();
+      await utils.product.getAllProducts.invalidate();
     },
     onError: async (err) => {
       console.log(err);
-      await utils.product.getById.refetch();
+      await utils.product.getAllProducts.invalidate();
     },
   });
 

@@ -15,6 +15,9 @@ import { Button } from "~/components/ui/button";
 import { useForm } from "react-hook-form";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
+import { uploadFiles } from "../../profile/_components/actions";
+import { useState } from "react";
+import Image from "next/image";
 
 const formSchema = z.object({
   name: z
@@ -92,13 +95,6 @@ const formOptions: FormOptions[] = [
     placeholder: "Enter the description",
     type: "text",
   },
-
-  {
-    label: "Image",
-    name: "image",
-    placeholder: "Enter the image URL",
-    type: "text",
-  },
 ];
 
 const initialState: Product = {
@@ -106,10 +102,16 @@ const initialState: Product = {
   price: 0,
   stock: "0",
   description: "This is a description",
-  image: "https://github.com/sital002.png",
+  image: "",
 };
 export default function ProductForm(props: ProductFormProps) {
   const router = useRouter();
+  const [productImages, setProductImages] = useState<
+    {
+      key: string;
+      url: string;
+    }[]
+  >([]);
   const form = useForm<Product>({
     resolver: zodResolver(formSchema),
     defaultValues: props.update ? props.product : initialState,
@@ -123,10 +125,15 @@ export default function ProductForm(props: ProductFormProps) {
   });
 
   function onSubmit(data: Product) {
+    if (productImages.length === 0) {
+      alert("Please upload at least one image");
+      return;
+    }
     if (!props.update) {
       return createProductMutation.mutate({
         description: data.description,
-        image: data.image,
+        url: productImages[0]?.url ?? "",
+        images: productImages,
         name: data.name,
         price: data.price,
         stock: parseInt(data.stock),
@@ -159,6 +166,42 @@ export default function ProductForm(props: ProductFormProps) {
             )}
           />
         ))}
+        <p>Product Image</p>
+        <div className="flex flex-wrap gap-2">
+          {productImages?.map((image) => (
+            <Image
+              key={image.key}
+              src={image.url}
+              alt={image.key}
+              width={30}
+              height={30}
+            />
+          ))}
+        </div>
+        <input
+          name="files"
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={async (e) => {
+            const files = e.target.files;
+            if (!files) return;
+            if (files.length > 5) {
+              alert("You can only upload 5 images at a time");
+              return;
+            }
+            const formData = new FormData();
+            Array.from(files).forEach((file) => {
+              formData.append("files", file);
+            });
+            const uploadedImages = await uploadFiles(formData);
+            const images = uploadedImages.map((image) => ({
+              url: image.data?.appUrl ?? "",
+              key: image.data?.appUrl ?? "",
+            }));
+            setProductImages(images);
+          }}
+        />
         <Button
           type="submit"
           className="w-full"

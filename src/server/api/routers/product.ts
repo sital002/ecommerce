@@ -1,3 +1,4 @@
+import { STATUS } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
@@ -6,6 +7,19 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { db } from "~/server/db";
+
+const imageSchema = z.object({ url: z.string(), key: z.string() });
+
+const productSchema = z.object({
+  name: z.string(),
+  id: z.string().optional(),
+  price: z.number(),
+  description: z.string(),
+  url: z.string(),
+  images: z.array(imageSchema),
+  stock: z.number(),
+  status: z.nativeEnum(STATUS).optional(),
+});
 
 export const productRouter = createTRPCRouter({
   get: publicProcedure.query(async ({ ctx }) => {
@@ -20,22 +34,38 @@ export const productRouter = createTRPCRouter({
     return db.product.findMany({ where: { status: "APPROVED" } });
   }),
 
+  getAllProducts: protectedProcedure.query(async ({ ctx }) => {
+    if (
+      ctx.session.user.role !== "ADMIN" &&
+      ctx.session.user.role !== "VENDOR"
+    ) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You are not authorized to view this page",
+      });
+    }
+    if (ctx.session.user.role === "VENDOR") {
+      return db.product.findMany({
+        where: { createdById: ctx.session.user.id },
+      });
+    }
+    return db.product.findMany();
+  }),
+
   create: protectedProcedure
-    .input(
-      z.object({
-        name: z.string().min(3).max(255),
-        description: z.string().min(10).max(500),
-        price: z.number().min(0).max(1000000),
-        image: z.string().url(),
-        stock: z.number().default(0),
-      }),
-    )
+    .input(productSchema)
     .mutation(async ({ input, ctx }) => {
       const user = ctx.session.user;
       if (user.role !== "VENDOR")
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not authorized to create products",
+        });
+
+      if (!user.emailVerified)
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You need to verify your email first",
         });
       if (!user.shop) {
         throw new TRPCError({
@@ -49,30 +79,27 @@ export const productRouter = createTRPCRouter({
           name: input.name,
           price: input.price,
           description: input.description,
-          url: input.image,
+          url: input.url,
           createdById: user.id,
           shopId: user.shop.id,
+          images: input.images,
         },
       });
     }),
 
   update: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        name: z.string().min(3).max(255),
-        description: z.string().min(10).max(500),
-        price: z.number().min(0).max(1000000),
-        image: z.string().url(),
-        stock: z.number().default(0),
-      }),
-    )
+    .input(productSchema)
     .mutation(async ({ input, ctx }) => {
       const user = ctx.session.user;
       if (user.role !== "VENDOR")
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not authorized to update products",
+        });
+      if (!user.emailVerified)
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You need to verify your email first",
         });
       if (!user.shop) {
         throw new TRPCError({
@@ -95,6 +122,11 @@ export const productRouter = createTRPCRouter({
           message: "You are not authorized to update this product",
         });
       }
+      if (!input.id)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Product ID is required",
+        });
       return db.product.update({
         where: { id: input.id },
         data: {
@@ -102,7 +134,8 @@ export const productRouter = createTRPCRouter({
           name: input.name,
           price: input.price,
           description: input.description,
-          url: input.image,
+          url: input.url,
+          images: input.images,
         },
       });
     }),
@@ -144,6 +177,8 @@ export const productRouter = createTRPCRouter({
           message: "You are not authorized to view this product",
         });
       }
-      return product;
+      const images: Array<{ url: string; key: string }> =
+        product.images as Array<{ url: string; key: string }>;
+      return { ...product, images };
     }),
 });
