@@ -39,6 +39,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
+import { uploadFiles } from "../../profile/_components/actions";
+import ProductForm from "./product-form";
 
 type Product = NonNullable<RouterOutputs["product"]["getById"]>;
 
@@ -53,7 +55,15 @@ export default function ProductEditApprovalPage({
   const [editedProduct, setEditedProduct] = useState<Product>(productData);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editMessage, setEditMessage] = useState("");
+  const [mainImage, setMainImage] = useState(product.url);
+  const [productImages, setProductImages] = useState<
+    {
+      key: string;
+      url: string;
+    }[]
+  >(product.images);
 
+  const [open, setOpen] = useState(false);
   const utils = api.useUtils();
   const updateProductMutation = api.admin.updateProductStatus.useMutation({
     onSuccess: async (data) => {
@@ -180,57 +190,12 @@ export default function ProductEditApprovalPage({
         </CardHeader>
         <CardContent className="space-y-6">
           {isEditing ? (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="name">Product Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={editedProduct.name}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={editedProduct.description}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="price">Price</Label>
-                  <Input
-                    id="price"
-                    name="price"
-                    type="number"
-                    value={editedProduct.price}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="stock">Stock</Label>
-                  <Input
-                    id="stock"
-                    name="stock"
-                    type="number"
-                    value={editedProduct.stock}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="category">Category</Label>
-                <Input
-                  id="category"
-                  name="category"
-                  value={"Category"}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
+            <ProductForm
+              update={true}
+              product={product}
+              open={open}
+              setOpen={setOpen}
+            />
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
@@ -265,12 +230,29 @@ export default function ProductEditApprovalPage({
                   <h3 className="text-lg font-semibold">Product Image</h3>
                   <div className="relative mt-2 h-60 w-full">
                     <Image
-                      src={product.url}
+                      src={mainImage}
                       alt={product.name}
                       layout="fill"
                       objectFit="cover"
                       className="rounded-md"
                     />
+                  </div>
+                  <div className="my-2 flex gap-2">
+                    {productImages.map((img, index) => (
+                      <div
+                        key={index}
+                        className="cursor-pointer rounded-md"
+                        onClick={() => setMainImage(img.url)}
+                      >
+                        <Image
+                          src={img.url}
+                          width={30}
+                          height={30}
+                          alt={`${product.name} - Image ${index + 1}`}
+                          className="rounded-md"
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -280,12 +262,7 @@ export default function ProductEditApprovalPage({
         <CardFooter className="flex justify-between">
           {session.data?.user.role === "VENDOR" &&
             (isEditing ? (
-              <>
-                <Button onClick={handleSave}>Save Changes</Button>
-                <Button variant="outline" onClick={handleCancel}>
-                  Cancel
-                </Button>
-              </>
+              <></>
             ) : (
               <Button onClick={handleEdit}>
                 <Edit className="mr-2 h-4 w-4" /> Edit Product

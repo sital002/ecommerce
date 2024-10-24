@@ -21,8 +21,8 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     id: params.id,
   });
   const [quantity, setQuantity] = useState(1);
-  const [mainImage, setMainImage] = useState(product?.images?.[0]?.url ?? "");
 
+  const [mainImage, setMainImage] = useState(product?.url);
   if (isLoading) return <p>Loading...</p>;
   if (!product) return <p>The Product couldn&apos;t be found </p>;
   const handleAddToCart = () => {
@@ -37,7 +37,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         <div className="space-y-4">
           <div className="relative aspect-square overflow-hidden rounded-lg">
             <Image
-              src={mainImage}
+              src={mainImage ?? product.url}
               alt={product.name}
               layout="fill"
               objectFit="cover"
@@ -72,7 +72,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                   <Star
                     key={i}
                     className={`h-5 w-5 ${
-                      i < Math.floor(100)
+                      i < Math.floor(4)
                         ? "fill-current text-yellow-400"
                         : "text-gray-300"
                     }`}

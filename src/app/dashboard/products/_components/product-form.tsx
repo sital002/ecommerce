@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { useForm } from "react-hook-form";
-import { api } from "~/trpc/react";
+import { api, type RouterOutputs } from "~/trpc/react";
 import { useRouter } from "next/navigation";
 import { uploadFiles } from "../../profile/_components/actions";
 import { useState } from "react";
@@ -43,7 +43,6 @@ const formSchema = z.object({
     .regex(/^[a-zA-Z\s]*$/, {
       message: "Description can only contain letters and spaces",
     }),
-  image: z.string().url(),
   stock: z.string().refine((val) => parseInt(val) >= 0, {
     message: "Stock must be a valid number",
   }),
@@ -60,7 +59,7 @@ type Product = z.infer<typeof formSchema>;
 
 interface UpdateProduct {
   update: true;
-  product: Product;
+  product: NonNullable<RouterOutputs["product"]["getById"]>;
 }
 interface CreateProduct {
   update?: false;
@@ -102,7 +101,6 @@ const initialState: Product = {
   price: 0,
   stock: "0",
   description: "This is a description",
-  image: "",
 };
 export default function ProductForm(props: ProductFormProps) {
   const router = useRouter();
@@ -114,7 +112,14 @@ export default function ProductForm(props: ProductFormProps) {
   >([]);
   const form = useForm<Product>({
     resolver: zodResolver(formSchema),
-    defaultValues: props.update ? props.product : initialState,
+    defaultValues: props.update
+      ? {
+          description: props.product.description,
+          name: props.product.name,
+          price: props.product.price,
+          stock: props.product.stock.toString(),
+        }
+      : initialState,
   });
   const createProductMutation = api.product.create.useMutation({
     onSuccess: () => {
@@ -207,7 +212,7 @@ export default function ProductForm(props: ProductFormProps) {
           className="w-full"
           disabled={createProductMutation.isPending}
         >
-          {createProductMutation.isPending ? "Adding" : "Add Product"}
+          {props.update ? "Update" : "Add Product"}
         </Button>
       </form>
     </Form>
