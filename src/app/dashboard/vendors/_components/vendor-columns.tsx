@@ -15,7 +15,7 @@ export const vendorColumns: ColumnDef<Shop>[] = [
   {
     accessorKey: "email",
     header: "Email",
-    cell: ({ row }) => row.original.email,
+    cell: ({ row }) => row.original.user.email,
   },
   {
     accessorKey: "emailVerified",

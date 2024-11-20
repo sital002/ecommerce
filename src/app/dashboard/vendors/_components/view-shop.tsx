@@ -31,7 +31,6 @@ import {
   User,
   CheckCircle,
   XCircle,
-  Edit,
   Eye,
 } from "lucide-react";
 import Image from "next/image";
@@ -69,20 +68,6 @@ export default function ShopApprovalPage({ shopDetail }: ViewShopDetailProps) {
     });
   };
 
-  const handleReject = () => {
-    setShop({ ...shop, status: "REJECTED" });
-    updateStatusMutation.mutate({
-      id: shop.id,
-      status: "REJECTED",
-      statusMessage: "",
-    });
-    toast({
-      title: "Shop Rejected",
-      description: `${shop.name} has been rejected.`,
-      variant: "destructive",
-    });
-  };
-
   const handleRequestEdit = () => {
     if (editMessage.trim() === "") {
       toast({
@@ -92,15 +77,16 @@ export default function ShopApprovalPage({ shopDetail }: ViewShopDetailProps) {
       });
       return;
     }
-    setShop({ ...shop, status: "PENDING" });
+    setShop({ ...shop, status: "REJECTED" });
     updateStatusMutation.mutate({
       id: shop.id,
-      status: "PENDING",
+      status: "REJECTED",
       statusMessage: editMessage,
     });
     toast({
-      title: "Edit Requested",
-      description: `Edit request sent to ${shop.name}.`,
+      title: "Shop Rejected",
+      description: `${shop.name} has been rejected.`,
+      variant: "destructive",
     });
     setEditMessage("");
     setIsEditDialogOpen(false);
@@ -132,6 +118,11 @@ export default function ShopApprovalPage({ shopDetail }: ViewShopDetailProps) {
           >
             {shop.status}
           </Badge>
+          <div>
+            {shop.statusMessage && (
+              <div className="text-sm text-gray-500">{shop.statusMessage}</div>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -207,17 +198,13 @@ export default function ShopApprovalPage({ shopDetail }: ViewShopDetailProps) {
           <Button onClick={handleApprove} disabled={shop.status === "APPROVED"}>
             <CheckCircle className="mr-2 h-4 w-4" /> Approve Shop
           </Button>
-          <Button
-            onClick={handleReject}
-            variant="destructive"
-            disabled={shop.status === "REJECTED"}
-          >
-            <XCircle className="mr-2 h-4 w-4" /> Reject Shop
-          </Button>
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline">
-                <Edit className="mr-2 h-4 w-4" /> Request Edit
+              <Button
+                variant="destructive"
+                disabled={shop.status === "REJECTED"}
+              >
+                <XCircle className="mr-2 h-4 w-4" /> Reject Shop
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">

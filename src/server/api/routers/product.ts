@@ -73,6 +73,12 @@ export const productRouter = createTRPCRouter({
           message: "You need to create a shop first",
         });
       }
+      if (user.shop.status !== "APPROVED") {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You need to get your shop approved first",
+        });
+      }
       return db.product.create({
         data: {
           stock: input.stock,
