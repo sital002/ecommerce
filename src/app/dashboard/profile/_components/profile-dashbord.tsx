@@ -27,6 +27,7 @@ interface ProfilePageProps {
 export default function ProfileDashboard({ user }: ProfilePageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState(user);
+  const [editedShop, setEditedShop] = useState(user.shop ? true : false);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -153,10 +154,16 @@ export default function ProfileDashboard({ user }: ProfilePageProps) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {user.shop && user.shop.status === "PENDING" ? (
-                    <ShopInfoPage shop={user.shop} />
+                  {editedShop ? (
+                    <ShopInfoPage
+                      shop={user.shop}
+                      setEditedShop={setEditedShop}
+                    />
                   ) : (
-                    <CreateShopForm shop={user.shop} />
+                    <CreateShopForm
+                      shop={user.shop}
+                      setEditedShop={setEditedShop}
+                    />
                   )}
                 </CardContent>
               </Card>

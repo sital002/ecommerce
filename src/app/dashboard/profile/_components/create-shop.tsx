@@ -33,8 +33,9 @@ const shopSchema = z.object({
 
 interface CreateShopFormProps {
   shop: RouterOutputs["shop"]["create"] | null;
+  setEditedShop: React.Dispatch<React.SetStateAction<boolean>>;
 }
-export function CreateShopForm({ shop }: CreateShopFormProps) {
+export function CreateShopForm({ shop, setEditedShop }: CreateShopFormProps) {
   const [ownerImage, setOwnerImage] = useState<UploadedFileData | null>(null);
   const [citizenshipImage, setCitizenshipImage] =
     useState<UploadedFileData | null>(null);
@@ -262,9 +263,17 @@ export function CreateShopForm({ shop }: CreateShopFormProps) {
               }}
             />
           )}
-          <Button type="submit" className="w-full">
-            Save
-          </Button>
+          <div className="flex gap-2">
+            <Button type="submit">Save</Button>
+            {shop ? (
+              <Button
+                variant="outline"
+                onClick={() => setEditedShop((prev) => !prev)}
+              >
+                Cancel
+              </Button>
+            ) : null}
+          </div>
         </form>
       </Form>
     </div>

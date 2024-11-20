@@ -3,11 +3,16 @@ import { Badge } from "~/components/ui/badge";
 import { MapPin, Phone, Clock, Store, FileText, User } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import Image from "next/image";
+import { Button } from "~/components/ui/button";
 
 type ShopInfoPageProps = {
   shop: NonNullable<RouterOutputs["user"]["get"]>["shop"];
+  setEditedShop: React.Dispatch<React.SetStateAction<boolean>>;
 };
-export default function ShopInfoPage({ shop }: ShopInfoPageProps) {
+export default function ShopInfoPage({
+  shop,
+  setEditedShop,
+}: ShopInfoPageProps) {
   console.log(shop);
   if (!shop) return null;
   return (
@@ -87,6 +92,14 @@ export default function ShopInfoPage({ shop }: ShopInfoPageProps) {
                 />
               </div>
             </div>
+          </div>
+          <div>
+            <Button
+              variant="default"
+              onClick={() => setEditedShop((prev) => !prev)}
+            >
+              Edit Shop Info
+            </Button>
           </div>
         </div>
       </div>
