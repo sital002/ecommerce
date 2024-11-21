@@ -124,8 +124,8 @@ model Shop {
     description      String
     address          String
     phone            String
-    citizenShipImage String
-    ownerImage       String
+    citizenShipImage Json
+    ownerImage       Json
     logo             String
     statusMessage    String?
     user             User      @relation(fields: [userId], references: [id])

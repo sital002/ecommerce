@@ -7,7 +7,6 @@ import {
 } from "~/server/api/trpc";
 import brcypt from "bcrypt";
 import { ACCOUNT_STATUS, ROLE } from "@prisma/client";
-import { sendEmail } from "~/server/utils/nodemailer.config";
 export const userRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.user.findUnique({

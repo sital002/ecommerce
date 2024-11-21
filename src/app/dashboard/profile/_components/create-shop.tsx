@@ -18,7 +18,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Image from "next/image";
 import type { UploadedFileData } from "uploadthing/types";
-import { uploadFiles } from "./actions";
+import { deleteFiles, uploadFiles } from "./actions";
 import { useRouter } from "next/navigation";
 
 const shopSchema = z.object({
@@ -39,10 +39,6 @@ export function CreateShopForm({ shop, setEditedShop }: CreateShopFormProps) {
   const [ownerImage, setOwnerImage] = useState<UploadedFileData | null>(null);
   const [citizenshipImage, setCitizenshipImage] =
     useState<UploadedFileData | null>(null);
-  const [previewImage, setPreviewImage] = useState<{
-    citizenShipImage: string;
-    ownerImage: string;
-  } | null>(null);
 
   const initialState = {
     name: "",
@@ -53,6 +49,7 @@ export function CreateShopForm({ shop, setEditedShop }: CreateShopFormProps) {
     phone: "",
     categories: [],
   };
+
   const form = useForm<z.infer<typeof shopSchema>>({
     resolver: zodResolver(shopSchema),
     defaultValues: shop
@@ -102,7 +99,10 @@ export function CreateShopForm({ shop, setEditedShop }: CreateShopFormProps) {
         description: data.description,
         logo: data.logo,
         name: data.name,
-        ownerImage: ownerImage?.appUrl ?? shop.ownerImage,
+        ownerImage: {
+          appUrl: ownerImage?.appUrl ?? shop.ownerImage,
+          key: ownerImage?.key ?? shop.ownerImage,
+        },
         phone: data.phone,
         citizenshipImage: citizenshipImage?.appUrl ?? shop.citizenShipImage,
       });
@@ -172,20 +172,24 @@ export function CreateShopForm({ shop, setEditedShop }: CreateShopFormProps) {
           />
 
           <p>Owner Image</p>
-          {previewImage?.ownerImage || shop?.ownerImage ? (
+          {ownerImage ? (
             <div className="flex items-center gap-2">
               <Image
-                src={previewImage?.ownerImage ?? shop?.ownerImage ?? ""}
+                src={ownerImage.appUrl}
                 width={300}
                 height={300}
                 alt="Owner image"
               />
               <Button
-                onClick={() => {
-                  setPreviewImage((prev) => ({
-                    citizenShipImage: prev?.citizenShipImage ?? "",
-                    ownerImage: "",
-                  }));
+                onClick={async () => {
+                  if (ownerImage) {
+                    const temp = ownerImage;
+                    setOwnerImage(null);
+                    const response = await deleteFiles(ownerImage.key);
+                    if (!response) {
+                      setOwnerImage(temp);
+                    }
+                  }
                 }}
               >
                 Delete
@@ -199,40 +203,35 @@ export function CreateShopForm({ shop, setEditedShop }: CreateShopFormProps) {
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
-                const reader = new FileReader();
                 const formData = new FormData();
                 formData.append("files", file);
                 const uploadedImages = await uploadFiles(formData);
                 if (!uploadedImages[0]?.data) return;
                 setOwnerImage(uploadedImages[0].data);
-                reader.onload = (e) => {
-                  const target = e.currentTarget as FileReader;
-                  setPreviewImage((prev) => ({
-                    citizenShipImage: prev?.citizenShipImage ?? "",
-                    ownerImage: target.result as string,
-                  }));
-                };
-                reader.readAsDataURL(file);
               }}
             />
           )}
           <p>Citizenship Image</p>
-          {previewImage?.citizenShipImage || shop?.citizenShipImage ? (
+          {citizenshipImage || shop?.citizenShipImage ? (
             <div className="flex items-center gap-2">
               <Image
-                src={
-                  previewImage?.citizenShipImage ?? shop?.citizenShipImage ?? ""
-                }
+                src={citizenshipImage?.appUrl ?? shop?.citizenShipImage}
                 width={300}
                 height={300}
                 alt="Citizenship image"
               />
               <Button
-                onClick={() => {
-                  setPreviewImage((prev) => ({
-                    citizenShipImage: "",
-                    ownerImage: prev?.ownerImage ?? "",
-                  }));
+                onClick={async (e) => {
+                  e.preventDefault();
+                  console.log(citizenshipImage);
+                  if (citizenshipImage) {
+                    const temp = citizenshipImage;
+                    setCitizenshipImage(null);
+                    const response = await deleteFiles(citizenshipImage.key);
+                    if (!response) {
+                      setCitizenshipImage(temp);
+                    }
+                  }
                 }}
               >
                 Delete
@@ -251,15 +250,6 @@ export function CreateShopForm({ shop, setEditedShop }: CreateShopFormProps) {
                 const uploadedImages = await uploadFiles(formData);
                 if (!uploadedImages[0]?.data) return;
                 setCitizenshipImage(uploadedImages[0].data);
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                  const target = e.currentTarget as FileReader;
-                  setPreviewImage((prev) => ({
-                    ownerImage: prev?.ownerImage ?? "",
-                    citizenShipImage: target.result as string,
-                  }));
-                };
-                reader.readAsDataURL(file);
               }}
             />
           )}
