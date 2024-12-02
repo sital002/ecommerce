@@ -9,8 +9,8 @@ const shopSchema = z.object({
   logo: z.string(),
   phone: z.string(),
   banner: z.string(),
-  ownerImage: z.string(),
-  citizenshipImage: z.string(),
+  ownerImage: z.object({ appUrl: z.string(), key: z.string() }),
+  citizenshipImage: z.object({ appUrl: z.string(), key: z.string() }),
   categories: z.array(z.string()),
 });
 export const shopRouter = createTRPCRouter({

@@ -35,10 +35,15 @@ interface CreateShopFormProps {
   shop: RouterOutputs["shop"]["create"] | null;
   setEditedShop: React.Dispatch<React.SetStateAction<boolean>>;
 }
+type ImageProps = {
+  appUrl: string;
+  key: string;
+};
 export function CreateShopForm({ shop, setEditedShop }: CreateShopFormProps) {
-  const [ownerImage, setOwnerImage] = useState<UploadedFileData | null>(null);
-  const [citizenshipImage, setCitizenshipImage] =
-    useState<UploadedFileData | null>(null);
+  const [ownerImage, setOwnerImage] = useState<ImageProps | null>(null);
+  const [citizenshipImage, setCitizenshipImage] = useState<ImageProps | null>(
+    shop?.citizenShipImage ?? null,
+  );
 
   const initialState = {
     name: "",
@@ -104,8 +109,12 @@ export function CreateShopForm({ shop, setEditedShop }: CreateShopFormProps) {
           key: ownerImage?.key ?? shop.ownerImage,
         },
         phone: data.phone,
-        citizenshipImage: citizenshipImage?.appUrl ?? shop.citizenShipImage,
+        citizenshipImage: {
+          appUrl: citizenshipImage?.appUrl ?? shop.citizenShipImage,
+          key: citizenshipImage?.key ?? shop.citizenShipImage,
+        },
       });
+      router.refresh();
       return;
     }
     if (!ownerImage || !citizenshipImage) return;
@@ -117,9 +126,15 @@ export function CreateShopForm({ shop, setEditedShop }: CreateShopFormProps) {
       description: data.description,
       logo: data.logo,
       name: data.name,
-      ownerImage: ownerImage?.appUrl,
+      ownerImage: {
+        appUrl: ownerImage.appUrl,
+        key: ownerImage.key,
+      },
       phone: data.phone,
-      citizenshipImage: citizenshipImage?.appUrl,
+      citizenshipImage: {
+        appUrl: citizenshipImage.appUrl,
+        key: citizenshipImage.key,
+      },
     });
   };
   return (

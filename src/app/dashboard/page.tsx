@@ -14,7 +14,6 @@ export default async function page() {
   if (role === "ADMIN") return <AdminDashboard />;
   const user = await api.user.get();
   if (!user) return <p>Something went wrong</p>;
-
   return (
     <div className="container mx-auto px-4 py-2">
       <SalesStats user={session.user} />

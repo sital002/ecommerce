@@ -28,6 +28,7 @@ export default function ProfileDashboard({ user }: ProfilePageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState(user);
   const [editedShop, setEditedShop] = useState(user.shop ? true : false);
+  console.log(user);
 
   const handleEdit = () => {
     setIsEditing(true);

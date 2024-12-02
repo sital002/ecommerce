@@ -9,10 +9,33 @@ import brcypt from "bcrypt";
 import { ACCOUNT_STATUS, ROLE } from "@prisma/client";
 export const userRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.user.findUnique({
+    const user = await ctx.db.user.findUnique({
       where: { id: ctx.session.user.id },
       include: { shop: true },
     });
+    if (!user)
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "User not found",
+      });
+    return {
+      ...user,
+      shop: user.shop
+        ? {
+            ...user.shop,
+            ownerImage:
+              typeof user.shop.ownerImage === "object" &&
+              user.shop.ownerImage !== null
+                ? (user.shop.ownerImage as { appUrl: string }).appUrl
+                : null,
+            citizenShipImage:
+              typeof user.shop.citizenShipImage === "object" &&
+              user.shop.citizenShipImage !== null
+                ? (user.shop.citizenShipImage as { appUrl: string }).appUrl
+                : null,
+          }
+        : null,
+    };
   }),
 
   update: protectedProcedure
